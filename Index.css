@@ -1,0 +1,77 @@
+#bilde {
+    padding: 2vw;
+	width:65vw;
+	height: 35vw;
+	display: block; /*Resulterer i en linebreak mellom to elementer*/
+	margin: auto;
+}
+p {
+	text-align: center;
+	font-family: Georgia;
+	font-size: 1,9vw;
+    
+}
+
+
+.Verden {
+	position: relative;
+    text-align: center;
+    color: white;
+}
+
+.Tekstverden {
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #e0e0e090;
+}
+
+#Lesmer { 
+	Top:-10vw;
+	width: calc(100%-10px);/*Regner ut bredde ved å ta bort paddingen som er på 10px. Dette gjør nettsiden responsiv*/ 
+	max-height: 20vw;
+    color: black; 
+	font: bold 24px/45px Helvetica, Sans-Serif; 
+	padding: 10px;
+    opacity: 1 !important;
+    font-family: Georgia;
+    
+}
+.Ring {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 20px
+}
+.Pluss {
+    margin-top: 3vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 10vw;
+
+    -webkit-transition: width 0.5s ease-in-out;
+	-moz-transition: width 0.5s ease-in-out;
+	transition: width 0.5s ease-in-out; 
+}
+.Pluss:hover {
+    opacity: 0.5;
+}
+footer {
+    padding: 1vw;
+    margin-top: 50px;
+    overflow: hidden; /*For å fikse en bug i css*/
+    background-color: rgba(50,50,50,0.75);
+    border: 1px 0px 0px 0px black solid;
+    color: #fff;
+}
+footer a {
+    float: right;
+    text-decoration: none;
+    color: #fff;
+    
+}
+footer p {
+    float: left;
+    
+}
