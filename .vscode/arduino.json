@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "DisplayTime\\DisplayTime.ino",
+    "programmer": "AVR ISP",
+    "port": "COM6"
+}
