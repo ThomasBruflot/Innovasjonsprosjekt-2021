@@ -61,7 +61,9 @@ void loop(void) {
     checkTime();
   }
   
-  /*if ((encoderPinALast == LOW) && (n == HIGH)) {
+  /*
+  n = digitalRead(encoderPinA);
+  if ((encoderPinALast == LOW) && (n == HIGH)) {
     if (digitalRead(encoderPinB) == LOW) {
       encoderPos--;
     } else {
