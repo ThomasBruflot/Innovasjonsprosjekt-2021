@@ -1,0 +1,193 @@
+//include libraries
+#include <TFTv2.h>
+#include <SPI.h>
+
+
+//Start and end time (do not format ie 03)
+int storedSecondsA = 0;  
+int storedMinutesA = 0;
+int storedSecondsB = 0;  
+int storedMinutesB = 0;
+
+const int stopPinA = 2;
+const int stopPinB = 1;  
+const int resetPin = 3;  
+const int triggerPin = 9;
+
+
+const int encoderPinA = 8;
+const int encoderPinB = 6;
+const int interruptPin = 10;
+int encoderPinALast = 7;
+int encoderPos = 0;
+int encoderPosChoose = 0;
+int n = 0;
+int timeAdjustedA = 0;
+int timeAdjustedB = 0;
+int encoderACount = 0;
+
+//this stores last time millis was fired (second time keeping)
+unsigned long timeA;
+unsigned long timeB;
+
+
+//running seconds (do not change)
+int secondsA = storedSecondsA;  
+int minutesA = storedMinutesA;
+int secondsB = storedSecondsB;  
+int minutesB = storedMinutesB;
+
+
+//store the last time value to check if we should write to screen more efficiently
+int lastSecondsA = secondsA;  
+int lastMinutesA = minutesA;
+int lastSecondsB = secondsB;  
+int lastMinutesB = minutesB;
+
+//number buffer for formatting
+char minbuf[3];  
+char secbuf[3];
+
+void setup(void) {  
+  pinMode(stopPin,INPUT_PULLUP);
+  pinMode(resetPin,INPUT_PULLUP);
+  pinMode(triggerPin,OUTPUT);
+  pinMode(encoderPinA, INPUT);
+  pinMode(encoderPinB, INPUT);
+  pinMode(encoderPinALast, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encoderPinA), choose(), HIGH);
+
+  configuration();
+  
+  
+  
+  TFT_BL_ON;      // turn on the background light
+  Tft.TFTinit();  // init TFT library
+  defaultScreen(); //load default screen
+}
+
+void loop(void) {  
+
+  //Stop the timer when stop is pressed
+  if(digitalRead(stopPinA)==HIGH){
+    timeA = millis();
+  }
+  if(digitalRead(stopPinB == HIGH) {
+    timeB = millis();  
+  }
+
+
+  //Every second render the timer
+  if((millis()-timeA)>= 1000){
+    checkTime();
+  }
+  if((millis()-timeB)>= 1000){
+    checkTime();
+  }
+
+}
+
+
+//Check if time has reached 0
+void checkTime(){  
+  if(!(secondsA == 0 && minutesA == 0)){
+    renderTimeA();
+  } 
+  if(!(secondsB == 0 && minutesB == 0)){
+    renderTimeB();
+  }
+  else {
+     fail(); //time is zero, do something
+  }
+}
+
+// Disse funksjonene må skrives om til å vise på den skjermen vi har:
+void renderTimeA(){  
+   
+}
+void renderTimeB(){  
+   
+}
+
+void fail(){  
+    digitalWrite(triggerPin, HIGH); 
+  }
+
+
+//What's on the screen
+void defaultScreen() {  
+  Tft.fillScreen();
+  Tft.drawString(":", 97, 130, 8, WHITE); //line 2 text
+  Tft.drawString("TIME", 5, 10, 9, WHITE); //line 2 text
+  Tft.drawString("REMAINING", 5, 90, 4, WHITE); //line 2 text
+}
+
+void encoder(){
+  n = digitalRead(encoderPinA);
+  //While button is not pushed in we read values, 
+  //if it is pushed the loop stops and we know which team we have setup
+  while(digitalRead(encoderPinA) == HIGH) {
+      if ((encoderPinALast == LOW) && (n == HIGH)) {
+          if (digitalRead(encoderPinB) == LOW) {
+             encoderPosChoose--;
+           } else {
+             encoderPosChoose++;
+           }
+        encoderPinALast = n;
+       }
+    }
+    //While button is not pushed in we read values, 
+    //if it is pushed the loop stops and time setup updated
+    while(digitalRead(encoderPinA) == HIGH) {
+      if ((encoderPinALast == LOW) && (n == HIGH)) {
+          if (digitalRead(encoderPinB) == LOW) {
+             encoderPos--;
+           } else {
+             encoderPos++;
+          }
+        encoderPinALast = n;
+        }
+     }
+
+    if(encoderPosChoose < 0) {
+      timeA += encoderPos;
+      timeAdjustedA = encoderPos;
+     } 
+     else if (encoderPosChoose > 0) {
+        timeB += encoderPos;
+        timeAdjustedB = encoderPos;
+      }
+      
+      
+} 
+
+void choose() {
+  if(encoderACount > 3) {
+    encoder();
+  }
+  else {
+    configuration();
+  }
+}
+
+void configuration() {
+  n = digitalRead(encoderPinA);
+  
+  //While button is not pushed in we read values, 
+  //if it is pushed the loop stops and time set up
+    while(digitalRead(encoderPinA) == HIGH) {
+      if ((encoderPinALast == LOW) && (n == HIGH)) {
+          if (digitalRead(encoderPinB) == LOW) {
+             encoderPos--;
+          } else {
+             encoderPos++;
+          }
+        encoderPinALast = n;
+       }
+     }
+
+    timeA = encoderPos;
+    timeB = encoderPos;
+     
+  }
+}
