@@ -49,14 +49,15 @@ char minbuf[3];
 char secbuf[3];
 
 void setup(void) {  
-  pinMode(stopPin,INPUT_PULLUP);
+  pinMode(stopPinA,INPUT_PULLUP);
+  pinMode(stopPinB,INPUT_PULLUP);
   pinMode(resetPin,INPUT_PULLUP);
   pinMode(triggerPin,OUTPUT);
   pinMode(encoderPinA, INPUT);
   pinMode(encoderPinB, INPUT);
   pinMode(encoderPinALast, INPUT);
   //Interrupt for encoderknappen for å spare arduinoen for jobb
-  attachInterrupt(digitalPinToInterrupt(encoderPinA), choose(), HIGH);
+  attachInterrupt(digitalPinToInterrupt(encoderPinA), choose, HIGH);
 
   configuration();
   
@@ -73,7 +74,7 @@ void loop(void) {
   if(digitalRead(stopPinA)==HIGH){
     timeA = millis();
   }
-  if(digitalRead(stopPinB == HIGH) {
+  if(digitalRead(stopPinB) == HIGH) {
     timeB = millis();  
   }
 
@@ -194,4 +195,3 @@ void configuration() {
     timeB = encoderPos;
      
   }
-}
