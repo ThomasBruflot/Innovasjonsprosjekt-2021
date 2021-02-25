@@ -12,9 +12,6 @@
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 
-//variables
-int minutes = 37;
-int sec = 59;
 
 void setup() {
   Serial.begin(9600);
@@ -34,41 +31,39 @@ void setup() {
   x = tft.readcommand8(ILI9341_RDSELFDIAG);
   Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX);
 
-  Serial.println(F("Done!"));
-  uint8_t rotation = 3;
+  int rotation = 3;
   tft.setRotation(rotation);
+  tft.fillScreen(ILI9341_BLACK);
+  printText("Hello world", 0,0, ILI9341_BLUE, 4);
+  printText("TEST", 0,50, ILI9341_RED, 6);
+
 }
 
 
 void loop(void) {
-  for (int i = 59; i > 0; i--) {
-    sec--;
-    testCountdown();
-    delay(1000);
-  }
+
 }
 
-
-unsigned long testCountdown() {
-  tft.fillScreen(ILI9341_BLACK);
-  //unsigned long start = micros();
-
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(10);
-  tft.println(String(minutes) + ":" + String(sec));
-  tft.println();
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(2);
-  tft.println("Time adjusted: ");
-
-  //return micros() - start;
-}
-
-void printText(char *text, uint16_t color, int x, int y,int textSize)
-{
-  tft.setCursor(x, y);
-  tft.setTextColor(color);
+void printText(String text, uint16_t xpos, uint16_t ypos, uint16_t textColor, uint8_t textSize){
+  tft.setCursor(xpos,ypos);
+  tft.setTextColor(textColor);
   tft.setTextSize(textSize);
-  tft.setTextWrap(true);
-  tft.print(text);
+  tft.println(text);
 }
+
+unsigned long testText() {
+  tft.fillScreen(ILI9341_BLACK);
+  unsigned long start = micros();
+  tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
+  tft.println("Hello World!");
+  tft.setTextColor(ILI9341_YELLOW); tft.setTextSize(2);
+  tft.println(1234.56);
+  tft.setTextColor(ILI9341_RED);    tft.setTextSize(3);
+  tft.println(0xDEADBEEF, HEX);
+  tft.println();
+  tft.setTextColor(ILI9341_GREEN);
+  tft.setTextSize(5);
+  tft.println("Groop");
+}
+
