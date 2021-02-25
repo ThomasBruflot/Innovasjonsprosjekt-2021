@@ -55,6 +55,7 @@ void setup(void) {
   pinMode(encoderPinA, INPUT);
   pinMode(encoderPinB, INPUT);
   pinMode(encoderPinALast, INPUT);
+  //Interrupt for encoderknappen for å spare arduinoen for jobb
   attachInterrupt(digitalPinToInterrupt(encoderPinA), choose(), HIGH);
 
   configuration();
@@ -114,7 +115,7 @@ void fail(){
   }
 
 
-//What's on the screen
+//What's on the screen: Må justeres
 void defaultScreen() {  
   Tft.fillScreen();
   Tft.drawString(":", 97, 130, 8, WHITE); //line 2 text
@@ -122,6 +123,7 @@ void defaultScreen() {
   Tft.drawString("REMAINING", 5, 90, 4, WHITE); //line 2 text
 }
 
+//Funksjon for å justere tiden med rotary encoder.
 void encoder(){
   n = digitalRead(encoderPinA);
   //While button is not pushed in we read values, 
@@ -160,7 +162,8 @@ void encoder(){
       
       
 } 
-
+//Hvis interrupt for encoder kalles må vi vite om vi skal konfigurere 
+//oppsettet eller justere tid. Det krever tre trykk for å konfigurere.
 void choose() {
   if(encoderACount > 3) {
     encoder();
@@ -170,6 +173,7 @@ void choose() {
   }
 }
 
+//Konfigurasjon ved oppstart for å sette tiden.
 void configuration() {
   n = digitalRead(encoderPinA);
   
