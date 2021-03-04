@@ -4,7 +4,7 @@ int sclRead = 0; //Verdien til O+
 int sdaRead = 0;  //Verdien til O-
 int diff = 0; //Differansen mellom spenningen fra O+ og O-
 bool active; //Sier om vi har kraft på sensoren
-int ref = 60; //Referansespenning som man måler utifra, ideelt 0 men her 1
+int ref = 60; //Referansespenning som man måler utifra, ideelt 0 men her 60.
 
 void setup() {
   Serial.begin(9600);           //  setup serial
