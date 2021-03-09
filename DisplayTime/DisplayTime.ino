@@ -1,188 +1,293 @@
-#include "SPI.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
+#include <SPI.h>
+#include <ILI9341_due_config.h>
+#include <ILI9341_due.h>
+#include <fonts\allFonts.h>
 
-//Pins for display
-#define TFT_DC 9
-#define TFT_CS 10
-//#define TFT_RST 8 //denne settes i stedet direktet til 3.3V
+//DISPLAY 1
+#define TFT_RST 22
+#define TFT_DC 23
+#define TFT_CS 4
+// Use hardware SPI and the above for CS/DC, https://www.arduino.cc/en/Reference/SPI
+ILI9341_due tft = ILI9341_due(TFT_CS, TFT_DC, TFT_RST);
 
-// Use hardware SPI (on Uno, #13 - SCK, #12 - MISO, #11 - MOSI) and the above for CS/DC
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+//DISPLAY 2
+#define TFT_RST2 24
+#define TFT_DC2 25
+#define TFT_CS2 10
+// Use hardware SPI and the above for CS/DC
+ILI9341_due tft2 = ILI9341_due(TFT_CS2, TFT_DC2, TFT_RST2);
 
-//TIMER VARIABLES
-//Start and end time (do not format ie 03)
-int storedSeconds = 0;
-int storedMinutes = 38;
+//THINKING TIME VARIABLES
+int storedSecondsA = 01;
+int storedMinutesA = 38;
 
-const int stopPin = 2;
-const int resetPin = 3;
-const int triggerPin = 4;
+int storedSecondsB = 01;
+int storedMinutesB = 38;
 
 //this stores last time millis was fired (second time keeping)
-unsigned long time;
+unsigned long TimeA;
+unsigned long TimeB;
 
 //running seconds (do not change)
-int seconds = storedSeconds;
-int minutes = storedMinutes;
+int secondsA = storedSecondsA;
+int minutesA = storedMinutesA;
+
+int secondsB = storedSecondsB;
+int minutesB = storedMinutesB;
 
 //store the last time value to check if we should write to screen more efficiently
-int lastSeconds = seconds;
-int lastMinutes = minutes;
+int lastSecondsA = secondsA;
+int lastMinutesA = minutesA;
+
+int lastSecondsB = secondsB;
+int lastMinutesB = minutesB;
 
 //number buffer for formatting
 char minbuf[3];
 char secbuf[3];
 
+//Arrays of adjustments for each team
+const int arrayLength = 20;
+int adjustmentsA[arrayLength] = {5, -22, 5, 20, -2, 8, 3};
+int adjustmentsB[arrayLength] = {10, -20, 15, 8, -30};
 
-void setup() {
-  pinMode(stopPin, INPUT);
-  pinMode(resetPin, INPUT);
-  pinMode(triggerPin, OUTPUT);
+//Variables for buttons and leds
+const int startPinA = 26;
+const int stopPinA = 27;
+bool startPinAon = false;
+bool stopPinAon = true;
+const int ledA = 28;
 
+const int startPinB = 29;
+const int stopPinB = 30;
+bool startPinBon = false;
+bool stopPinBon = true;
+const int ledB = 31;
+
+//Variables for rotary encoder
+const int encoderDT = 2;
+const int encoderCLK = 8;
+const int encoderSW = 7; //Button
+int REpushCount = 0;     //how many times the button on the rotary encoder has been pushed
+
+void setup()
+{
+  //Display setup
   Serial.begin(9600);
-  while (!Serial) ; // wait for Arduino Serial Monitor
-  Serial.println(F("ILI9341 Test!"));
+  while (!Serial); // wait for Arduino Serial Monitor
 
   tft.begin();
+  tft2.begin();
 
-  // read diagnostics (optional but can help debug problems)
-  uint8_t x = tft.readcommand8(ILI9341_RDMODE);
-  Serial.print(F("Display Power Mode: 0x")); Serial.println(x, HEX);
-  x = tft.readcommand8(ILI9341_RDMADCTL);
-  Serial.print(F("MADCTL Mode: 0x")); Serial.println(x, HEX);
-  x = tft.readcommand8(ILI9341_RDPIXFMT);
-  Serial.print(F("Pixel Format: 0x")); Serial.println(x, HEX);
-  x = tft.readcommand8(ILI9341_RDIMGFMT);
-  Serial.print(F("Image Format: 0x")); Serial.println(x, HEX);
-  x = tft.readcommand8(ILI9341_RDSELFDIAG);
-  Serial.print(F("Self Diagnostic: 0x")); Serial.println(x, HEX);
+  int rotation = 3; //rotates screen to horizontal orientation
+  tft.setRotation((iliRotation)rotation);
+  tft2.setRotation((iliRotation)rotation);
 
-  time = millis(); //Start internal countdown
-  int rotation = 3;
-  tft.setRotation(rotation);
-  defaultScreen();
+  //Buttons and LED setup
+  pinMode(startPinA, INPUT);
+  pinMode(stopPinA, INPUT);
+  pinMode(ledA, OUTPUT);
+  pinMode(startPinB, INPUT);
+  pinMode(stopPinB, INPUT);
+  pinMode(ledB, OUTPUT);
 
-}
+  //Rotary encoder setup
+  pinMode(encoderSW, INPUT_PULLUP);  // turn on pull-up resistor
+  pinMode(encoderDT, INPUT_PULLUP);  // turn on pull-up resistor
+  pinMode(encoderCLK, INPUT_PULLUP); // turn on pull-up resistor
 
+  //Interrupts for buttons
+  //attachInterrupt(digitalPinToInterrupt(encoderDT), doEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoderSW), encoderState, RISING); // Rotary encoder
+  attachInterrupt(digitalPinToInterrupt(startPinA), startA, RISING);       //StartButtonA
+  attachInterrupt(digitalPinToInterrupt(stopPinA), stopA, RISING);         //StopButtonA
+  attachInterrupt(digitalPinToInterrupt(startPinB), startB, RISING);       //StartButtonB
+  attachInterrupt(digitalPinToInterrupt(stopPinB), stopB, RISING);         //StopButtonB
 
-void loop(void) {
-  //Stop the timer when stop is pressed
-  if (digitalRead(stopPin) == HIGH) {
-    time = millis();
-  }
+  defaultScreen(); //Starts deafualt screen
 
-  //reset timer
-  if (digitalRead(resetPin) == HIGH) {
-    resetTimer();
-    digitalWrite(triggerPin, HIGH);
-  }
-
-  //Every second render the timer
-  if ((millis() - time) >= 1000) {
-    checkTime();
-  }
+  TimeA = millis(); //Start internal countdown
+  TimeB = millis(); //Start internal countdown
 
 }
 
-unsigned long printText(String text, uint16_t xpos, uint16_t ypos, uint8_t textSize, uint16_t textColor) {
+void startA()
+{
+  digitalWrite(ledA, HIGH);
+  startPinAon = true;
+  stopPinAon = false;
+}
+
+
+void startB()
+{
+  digitalWrite(ledB, HIGH);
+  startPinBon = true;
+  stopPinBon = false;
+}
+
+void stopA()
+{
+  digitalWrite(ledA, LOW);
+  startPinAon = false;
+  stopPinAon = true;
+}
+
+
+void stopB()
+{
+  digitalWrite(ledB,  LOW);
+  startPinBon = false;
+  stopPinBon = true;
+}
+
+void loop(void)
+{
+  //Every second render timerA
+  if (startPinAon == true && stopPinAon == false) {
+    if ((millis() - TimeA) >= 1000)
+    {
+      checkTime(secondsA, minutesA, lastSecondsA, lastMinutesA, TimeA, tft);
+    }
+  }
+
+
+  //Every second render timerB
+  if (startPinBon == true && stopPinBon == false) {
+    if ((millis() - TimeB) >= 1000)
+    {
+      checkTime(secondsB, minutesB, lastSecondsB, lastMinutesB, TimeB, tft2);
+    }
+  }
+}
+
+unsigned long printText(String text, uint16_t xpos, uint16_t ypos, uint8_t textSize, uint16_t textColor, ILI9341_due screen)
+{
   unsigned long start = micros();
-  tft.setCursor(xpos, ypos);
-  tft.setTextColor(textColor);
-  tft.setTextSize(textSize);
-  tft.println(text);
+  screen.cursorToXY(xpos, ypos);
+  screen.setFont(Arial14);
+  screen.setTextColor(textColor);
+  screen.setTextScale(textSize);
+  screen.println(text);
   return micros() - start;
 }
 
 //Check if time has reached 0
-void checkTime() {
-  if (!(seconds == 0 && minutes == 0)) {
-    renderTime();
-  } else {
-    fail(); //time is zero, do something
+void checkTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen)
+{
+  if (!(seconds == 0 && minutes == 0))
+  {
+    renderTime(seconds, minutes, lastSeconds, lastMinutes, Time, screen);
+  }
+  else
+  {
+    //time is zero, do something
   }
 }
 
-void renderTime() {
-  time = millis(); //reset internal second countdown
+void renderTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen)
+{
+  Time = millis(); //reset internal second countdown
 
   //when seconds reach 0 subtract from minutes
-  if (seconds == 0 && minutes != 0) {
+  if (seconds == 0 && minutes != 0)
+  {
     seconds = 60;
     minutes--;
   }
   seconds--;
 
   //only paint over seconds if there is a change in second
-  if (lastSeconds != seconds) {
-    tft.fillRect(164, 0, 143, 91, ILI9341_BLACK); //paint a black square over past seconds
+  if (lastSeconds != seconds)
+  {
+    screen.fillRect(164, 0, 155, 125, ILI9341_BLACK); //paint a black square over past seconds
   }
   //only paint over minutes if there is a change in minute
-  if (lastMinutes != minutes) {
-    tft.fillRect(0, 0, 143, 91, ILI9341_BLACK); //paint a black square over past minutes
+  if (lastMinutes != minutes)
+  {
+    screen.fillRect(0, 0, 155, 125, ILI9341_BLACK); //paint a black square over past minutes
   }
   sprintf(secbuf, "%02d", seconds); //using sprintf to format our time correctly (ie 01 instead of just 1)
   sprintf(minbuf, "%02d", minutes);
-  printText(minbuf, 0, 0, 13, ILI9341_WHITE);
-  printText(secbuf, 164, 0, 13, ILI9341_WHITE); //line 2 text
+  printText(minbuf, 0, 0, 11, ILI9341_WHITE, screen);
+  printText(secbuf, 164, 0, 11, ILI9341_WHITE, screen); //line 2 text
   lastSeconds = seconds;
   lastMinutes = minutes;
 }
 
-void fail() {
-  digitalWrite(triggerPin, HIGH);
-}
 
-//reset the timer
-void resetTimer() {
-  seconds = storedSeconds;
-  minutes = storedMinutes;
-  checkTime();
-}
 
 //What's on the screen
-unsigned long defaultScreen() {
+unsigned long defaultScreen()
+{
   tft.fillScreen(ILI9341_BLACK);
+  tft2.fillScreen(ILI9341_BLACK);
+
   unsigned long start = micros();
-  printText(":", 121, 0, 13, ILI9341_WHITE); //line 2 text
-  printText("Time adjusted: ", 0, 180, 2, ILI9341_WHITE);
-  timeadjustments();
+  //Display 1
+  renderTime(secondsA, minutesA, lastSecondsA, lastMinutesA, TimeA, tft);
+  printText(":", 156, 25, 7, ILI9341_WHITE, tft); //line 2 text
+  printText("Time adjusted: ", 0, 180, 1, ILI9341_WHITE, tft);
+  //Display 2
+  renderTime(secondsB, minutesB, lastSecondsB, lastMinutesB, TimeB, tft2);
+  printText(":", 156, 25, 7, ILI9341_WHITE, tft2); //line 2 text
+  printText("Time adjusted: ", 0, 180, 1, ILI9341_WHITE, tft2);
+
+  timeadjustments(adjustmentsA, tft);
+  timeadjustments(adjustmentsB, tft2);
+
   return micros() - start;
 }
+
+//Variables for calculating positions for nubers in time adjustments
 //for textsize 2, pixelwidth including 2 pixel spacing:
-uint8_t digit = 12; 
-uint8_t doubleDigit = 24;
-uint8_t negDigit = 24;
-uint8_t doubleNegDigit = 36;
+uint8_t digit = 12;
+uint8_t doubleDigit = 20;
+uint8_t negDigit = 20;
+uint8_t doubleNegDigit = 24;
 uint8_t barWidth = 4;
 
-unsigned long timeadjustments() {
+unsigned long timeadjustments(int adjustments[], ILI9341_due& screen)
+{
   unsigned long start = micros();
-  tft.fillRect(0, 200, 300, 20, ILI9341_BLACK); //paint a black square over past adjustments
-  int adjustments[] = {5, 22, -5, -20,18,5,-5};
-  int size = sizeof(adjustments) / 2; //size of array
-  printText("|", 0, 200, 2, ILI9341_WHITE); //prints first bar
-  int xpos = 6; //express the x position of timeadjustment
+  screen.fillRect(0, 200, 300, 20, ILI9341_BLACK); //paint a black square over past adjustments
 
-  for (int i = 0; i < size; i++) {//goes through adjustments array
-    if (adjustments[i] >= 0 && adjustments[i] < 10) {//numbers from 0-9
-      printText(String(adjustments[i]), xpos + 4, 200, 2, ILI9341_GREEN);
-      printText("|", xpos + digit , 200, 2, ILI9341_WHITE);
+  printText("|", 0, 200, 1, ILI9341_WHITE, tft); //prints first bar
+  int xpos = 6;                                  //express the x position of timeadjustment
+
+  for (int i = 0; i < arrayLength; i++)
+  { //goes through adjustments array
+    //Wont write 0's out
+    if (adjustments[i] == 0)
+    {
+      continue;
+    }
+    //numbers from 0-9
+    else if (adjustments[i] >= 0 && adjustments[i] < 10)
+    {
+      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
+      printText("|", xpos + digit, 200, 1, ILI9341_WHITE, screen);
       xpos += digit + barWidth;
     }
-    else if (adjustments[i] >= 10) {//numbers over 9
-      printText(String(adjustments[i]), xpos + 4, 200, 2, ILI9341_GREEN);
-      printText("|", xpos + doubleDigit, 200, 2, ILI9341_WHITE);
+    //numbers over 9
+    else if (adjustments[i] >= 10)
+    {
+      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
+      printText("|", xpos + doubleDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += doubleDigit + barWidth;
     }
-    else if (adjustments[i] < 0 && adjustments[i] > -10) { //negative numbers from 0-9
-      printText(String(adjustments[i]), xpos + 4, 200, 2, ILI9341_RED);
-      printText("|", xpos + negDigit, 200, 2, ILI9341_WHITE);
+    //negative numbers from 0-9
+    else if (adjustments[i] < 0 && adjustments[i] > -10)
+    {
+      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
+      printText("|", xpos + negDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += negDigit + barWidth;
     }
-    else if (adjustments <= -10) {
-      printText(String(adjustments[i]), xpos + 4, 200, 2, ILI9341_RED);
-      printText("|", xpos + doubleNegDigit, 200, 2, ILI9341_WHITE);
+    //negativ numbers <= -10
+    else if (adjustments[i] <= -10)
+    {
+      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
+      printText("|", xpos + doubleNegDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += doubleNegDigit + barWidth;
     }
   }

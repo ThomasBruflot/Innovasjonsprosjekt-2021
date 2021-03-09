@@ -1,0 +1,6 @@
+{
+    "board": "arduino:sam:arduino_due_x_dbg",
+    "programmer": "AVR ISP",
+    "port": "COM10",
+    "sketch": "DisplayTime.ino"
+}
