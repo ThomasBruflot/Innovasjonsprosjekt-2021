@@ -1,3 +1,4 @@
+//Nødvendige bibliotek for Arduino Due
 #include <SPI.h>
 #include <ILI9341_due_config.h>
 #include <ILI9341_due.h>
@@ -24,21 +25,21 @@ int storedMinutesA = 38;
 int storedSecondsB = 01;
 int storedMinutesB = 38;
 
-//this stores last time millis was fired (second time keeping)
+//This stores last time millis was fired (second time keeping)
 unsigned long TimeA;
 unsigned long TimeB;
 
-//running seconds (do not change)
+//running seconds and minutes for team A
 int secondsA = storedSecondsA;
 int minutesA = storedMinutesA;
 
+//running seconds and minutes for team B
 int secondsB = storedSecondsB;
 int minutesB = storedMinutesB;
 
 //store the last time value to check if we should write to screen more efficiently
 int lastSecondsA = secondsA;
 int lastMinutesA = minutesA;
-
 int lastSecondsB = secondsB;
 int lastMinutesB = minutesB;
 
@@ -51,31 +52,32 @@ const int arrayLength = 20;
 int adjustmentsA[arrayLength] = {5, -22, 5, 20, -2, 8, 3};
 int adjustmentsB[arrayLength] = {10, -20, 15, 8, -30};
 
-//Variables for buttons and leds
+//Variables for buttons and leds for team A
 const int startPinA = 26;
 const int stopPinA = 27;
+const int ledA = 28;
 bool startPinAon = false;
 bool stopPinAon = true;
-const int ledA = 28;
 
+//Variables for buttons and leds for team B
 const int startPinB = 29;
 const int stopPinB = 30;
+const int ledB = 31;
 bool startPinBon = false;
 bool stopPinBon = true;
-const int ledB = 31;
 
 //Variables for rotary encoder
-const int encoderDT = 2;
-const int encoderCLK = 8;
-const int encoderSW = 7; //Button
+const int encoderDT = 2; //Må være koblet til pin 2 for å fungere optimalt
+const int encoderCLK = 3; //Må være koblet til pin 3 for å fungere optimalt
+const int encoderSW = 32; //Button
 int REpushCount = 0;     //how many times the button on the rotary encoder has been pushed
+volatile int encoderValue = 0;
 
 void setup()
 {
   //Display setup
   Serial.begin(9600);
   while (!Serial); // wait for Arduino Serial Monitor
-
   tft.begin();
   tft2.begin();
 
@@ -97,62 +99,32 @@ void setup()
   pinMode(encoderCLK, INPUT_PULLUP); // turn on pull-up resistor
 
   //Interrupts for buttons
-  //attachInterrupt(digitalPinToInterrupt(encoderDT), doEncoder, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(encoderSW), encoderState, RISING); // Rotary encoder
   attachInterrupt(digitalPinToInterrupt(startPinA), startA, RISING);       //StartButtonA
   attachInterrupt(digitalPinToInterrupt(stopPinA), stopA, RISING);         //StopButtonA
   attachInterrupt(digitalPinToInterrupt(startPinB), startB, RISING);       //StartButtonB
   attachInterrupt(digitalPinToInterrupt(stopPinB), stopB, RISING);         //StopButtonB
+  //Interrupts for rotary encoder
+  attachInterrupt(digitalPinToInterrupt(encoderDT), encoderRotation, CHANGE); //Change in rotation
+  attachInterrupt(digitalPinToInterrupt(encoderSW), encoderState, RISING); //Button
 
   defaultScreen(); //Starts deafualt screen
 
   TimeA = millis(); //Start internal countdown
   TimeB = millis(); //Start internal countdown
-
 }
 
-void startA()
-{
-  digitalWrite(ledA, HIGH);
-  startPinAon = true;
-  stopPinAon = false;
-}
-
-
-void startB()
-{
-  digitalWrite(ledB, HIGH);
-  startPinBon = true;
-  stopPinBon = false;
-}
-
-void stopA()
-{
-  digitalWrite(ledA, LOW);
-  startPinAon = false;
-  stopPinAon = true;
-}
-
-
-void stopB()
-{
-  digitalWrite(ledB,  LOW);
-  startPinBon = false;
-  stopPinBon = true;
-}
 
 void loop(void)
 {
-  //Every second render timerA
+  //Every second check and render timerA
   if (startPinAon == true && stopPinAon == false) {
-    if ((millis() - TimeA) >= 1000)
-    {
+    if ((millis() - TimeA) >= 1000)    {
       checkTime(secondsA, minutesA, lastSecondsA, lastMinutesA, TimeA, tft);
     }
   }
 
 
-  //Every second render timerB
+  //Every second check and render timerB
   if (startPinBon == true && stopPinBon == false) {
     if ((millis() - TimeB) >= 1000)
     {
@@ -161,50 +133,61 @@ void loop(void)
   }
 }
 
-unsigned long printText(String text, uint16_t xpos, uint16_t ypos, uint8_t textSize, uint16_t textColor, ILI9341_due screen)
-{
-  unsigned long start = micros();
-  screen.cursorToXY(xpos, ypos);
-  screen.setFont(Arial14);
-  screen.setTextColor(textColor);
-  screen.setTextScale(textSize);
-  screen.println(text);
-  return micros() - start;
+//What happens when start button for team A is pressed
+void startA() {
+  digitalWrite(ledA, HIGH);
+  startPinAon = true;
+  stopPinAon = false;
+}
+
+//What happens when start button for team B is pressed
+void startB() {
+  digitalWrite(ledB, HIGH);
+  startPinBon = true;
+  stopPinBon = false;
+}
+
+//What happens when stop button for team A is pressed
+void stopA() {
+  digitalWrite(ledA, LOW);
+  startPinAon = false;
+  stopPinAon = true;
+}
+
+//What happens when stop button for team B is pressed
+void stopB() {
+  digitalWrite(ledB,  LOW);
+  startPinBon = false;
+  stopPinBon = true;
 }
 
 //Check if time has reached 0
-void checkTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen)
-{
-  if (!(seconds == 0 && minutes == 0))
-  {
+void checkTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen) {
+  if (!(seconds == 0 && minutes == 0))  {
     renderTime(seconds, minutes, lastSeconds, lastMinutes, Time, screen);
   }
-  else
-  {
+  else  {
     //time is zero, do something
   }
 }
 
-void renderTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen)
-{
+//Upates the screen with correct time when called
+void renderTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, unsigned long& Time, ILI9341_due& screen) {
   Time = millis(); //reset internal second countdown
 
   //when seconds reach 0 subtract from minutes
-  if (seconds == 0 && minutes != 0)
-  {
+  if (seconds == 0 && minutes != 0)  {
     seconds = 60;
     minutes--;
   }
   seconds--;
 
   //only paint over seconds if there is a change in second
-  if (lastSeconds != seconds)
-  {
+  if (lastSeconds != seconds)  {
     screen.fillRect(164, 0, 155, 125, ILI9341_BLACK); //paint a black square over past seconds
   }
   //only paint over minutes if there is a change in minute
-  if (lastMinutes != minutes)
-  {
+  if (lastMinutes != minutes)  {
     screen.fillRect(0, 0, 155, 125, ILI9341_BLACK); //paint a black square over past minutes
   }
   sprintf(secbuf, "%02d", seconds); //using sprintf to format our time correctly (ie 01 instead of just 1)
@@ -215,11 +198,8 @@ void renderTime(int& seconds, int& minutes, int& lastSeconds, int& lastMinutes, 
   lastMinutes = minutes;
 }
 
-
-
-//What's on the screen
-unsigned long defaultScreen()
-{
+//Prints out default text on screen when powered on
+unsigned long defaultScreen() {
   tft.fillScreen(ILI9341_BLACK);
   tft2.fillScreen(ILI9341_BLACK);
 
@@ -228,6 +208,7 @@ unsigned long defaultScreen()
   renderTime(secondsA, minutesA, lastSecondsA, lastMinutesA, TimeA, tft);
   printText(":", 156, 25, 7, ILI9341_WHITE, tft); //line 2 text
   printText("Time adjusted: ", 0, 180, 1, ILI9341_WHITE, tft);
+
   //Display 2
   renderTime(secondsB, minutesB, lastSecondsB, lastMinutesB, TimeB, tft2);
   printText(":", 156, 25, 7, ILI9341_WHITE, tft2); //line 2 text
@@ -239,6 +220,7 @@ unsigned long defaultScreen()
   return micros() - start;
 }
 
+
 //Variables for calculating positions for nubers in time adjustments
 //for textsize 2, pixelwidth including 2 pixel spacing:
 uint8_t digit = 12;
@@ -247,49 +229,58 @@ uint8_t negDigit = 20;
 uint8_t doubleNegDigit = 24;
 uint8_t barWidth = 4;
 
-unsigned long timeadjustments(int adjustments[], ILI9341_due& screen)
-{
+//Function to add adjusted time to the screen
+unsigned long timeadjustments(int adjustments[], ILI9341_due& screen) {
   unsigned long start = micros();
   screen.fillRect(0, 200, 300, 20, ILI9341_BLACK); //paint a black square over past adjustments
 
   printText("|", 0, 200, 1, ILI9341_WHITE, tft); //prints first bar
   int xpos = 6;                                  //express the x position of timeadjustment
 
-  for (int i = 0; i < arrayLength; i++)
-  { //goes through adjustments array
+  for (int i = 0; i < arrayLength; i++) { //goes through adjustments array
     //Wont write 0's out
-    if (adjustments[i] == 0)
-    {
+    if (adjustments[i] == 0)    {
       continue;
     }
+
     //numbers from 0-9
-    else if (adjustments[i] >= 0 && adjustments[i] < 10)
-    {
+    else if (adjustments[i] >= 0 && adjustments[i] < 10) {
       printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
       printText("|", xpos + digit, 200, 1, ILI9341_WHITE, screen);
       xpos += digit + barWidth;
     }
+
     //numbers over 9
-    else if (adjustments[i] >= 10)
-    {
+    else if (adjustments[i] >= 10)    {
       printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
       printText("|", xpos + doubleDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += doubleDigit + barWidth;
     }
+
     //negative numbers from 0-9
-    else if (adjustments[i] < 0 && adjustments[i] > -10)
-    {
+    else if (adjustments[i] < 0 && adjustments[i] > -10)    {
       printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
       printText("|", xpos + negDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += negDigit + barWidth;
     }
+
     //negativ numbers <= -10
-    else if (adjustments[i] <= -10)
-    {
+    else if (adjustments[i] <= -10)    {
       printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
       printText("|", xpos + doubleNegDigit, 200, 1, ILI9341_WHITE, screen);
       xpos += doubleNegDigit + barWidth;
     }
   }
+  return micros() - start;
+}
+
+//Function to print text to the screen
+unsigned long printText(String text, uint16_t xpos, uint16_t ypos, uint8_t textSize, uint16_t textColor, ILI9341_due screen) {
+  unsigned long start = micros();
+  screen.cursorToXY(xpos, ypos);
+  screen.setFont(Arial14);
+  screen.setTextColor(textColor);
+  screen.setTextScale(textSize);
+  screen.println(text);
   return micros() - start;
 }
