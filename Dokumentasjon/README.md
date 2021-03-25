@@ -1,1 +1,1 @@
-
+Her bør dere legge inn dokumentasjon fra det dere har jobbet med, type lenker til nettsider, valg dere har gjort og ting som bør forklares. Ved å gjøre dette blir det enklere for de andre i gruppa å forstå hva folk har gjort. I tillegg er dette greit å ha når vi skal skrive rapporten.
