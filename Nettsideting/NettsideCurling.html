@@ -39,14 +39,14 @@ body {font-family: "Lato", sans-serif}
 
   
   <!-- The Band Section -->
-  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="band">
-    <h2 class="w3-wide">Curling</h2>
-    <p class="w3-opacity"><i>Hello hello her kan det stå noe</i></p>
-    <p class="w3-justify">Vi har laget et skikkelig kult prosjekt som funker sånn og sånn ja mhmh.</p>
+  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="">
+    <h2 class="w3-wide text-primary">SmartHUB9000</h2>
+    <p class="text-danger"><i>Tidtakingssystemet for DEG!</i></p>
+    <p class="w3-center">Er du en curler som trenger et tidtakingssystem?<br> Er du en dommer som helst vil ha oversikt over alle banene samtidig?<br> SmarHUB9000 er løsningen for deg!</p>
     <div class="w3-row w3-padding-32">
-      <div class="w3-third">
-        <p>Cuuuurling</p>
-        <img src="curling.jpg" class="w3-round w3-margin-bottom" alt="Random Name" style="width:60%">
+      <div class="w3-center">
+        <p>Et bilde med sykt dårlig oppløsning!</p>
+        <img src="Skjermbilde 2021-03-18 kl. 10.51.28.png" class="w3-round w3-center" alt="Random Name" style="width:100%">
       </div>
     </div>
   </div>
@@ -54,51 +54,204 @@ body {font-family: "Lato", sans-serif}
 
 
 <!-- Bane 1-->
-  <div class="w3-black" id="tour">
+  <div class="w3-black" id="band">
     <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
       <h2 class="w3-wide w3-center">BANE 1</h2>
-      <p class="w3-opacity w3-center"><i>Lag 1</i></p><br>
-      
-        <!-- Timer (veldig kokt)-->
-  <script>
-   var myTimerObj = (function(document){
-   
-   var myTimer;
-   function start() { //Starter timeren
-     myTimer = setInterval(myClock, 1000); 
-     var c = 32*60; //antall minutter (i sekunder)
-     function myClock() {
-       document.getElementById("demo").innerHTML = ~~((--c)%(24*3600*3600)/60)+":" + ~~(--c%60);
-        //dette er litt stygt, og burde sikkert ordnes, men her konverter man sekundene til minutter og restsekunder
-       if (c == 0) { //når tiden når null får man et varsel om at tiden er ute
-         clearInterval(myTimer);
-         alert("Tiden er ute for Lag 1");
-       }
-     }
-   }
-   function resume() {
-       
-   }
-   function end() {
-       clearInterval(myTimer) //stopper timeren
-   }
+      <div align="center">
+        <p>Juster tid for lag 1:</p>
+        <input type="number" id="tidJustert" value="0">
+        <button type="button" class="btn btn-info" onclick="endre_tid()">Juster Tid</button>
+        </div>
+        <!-- Timer 1 (veldig kokt)-->
+        <div id="clockdiv"></div>
+        <center>
+        <p class="fs-1" id="poof">10:00</p>
+        <br>
+        <button class="btn btn-success fs-1" id="start">Start</button>
+        <button id="pause" class="btn btn-danger fs-1">Stopp</button>
+        <button class="btn btn-info fs-1" id="stop">Reset</button>
+      </center>
+        <br><br>
+        <script>
+            // 10 minutes from now
+        var time_in_minutes = 10;
+        var current_time = Date.parse(new Date());
+        var deadline = new Date(current_time + time_in_minutes*60*1000);
+        
+        
+        function time_remaining(endtime){
+          var t = Date.parse(endtime) - Date.parse(new Date());
+          var seconds = Math.floor( (t/1000) % 60 );
+          var minutes = Math.floor( (t/1000/60) % 60 );
+          var hours = Math.floor( (t/(1000*60*60)) % 24 );
+          var days = Math.floor( t/(1000*60*60*24) );
+          return {'total':t, 'days':days, 'hours':hours, 'minutes':minutes, 'seconds':seconds};
+        }
+        
+        var timeinterval;
+        function run_clock(id,endtime){
+          var clock = document.getElementById(id);
+          function update_clock(){
+            var t = time_remaining(endtime);
+            clock.setAttribute('style', 'text-align: center; font-size:38px; display:block;');
+            if(t.seconds>9){
+            clock.innerHTML = t.minutes+':'+t.seconds;
+            }
+            else{
+              clock.innerHTML = t.minutes+':'+"0"+t.seconds ;
+            }
+            if(t.total<=0){ clearInterval(timeinterval); }
+          }
+          update_clock(); // run function once at first to avoid delay
+          timeinterval = setInterval(update_clock,1000);
+        }
+        function start_clock(){ //starter klokken, vil helst ikke at den skal begynne automatisk
 
-   return {start:start, end:end};
- })(document);
-  </script>
-  <div align="center">
- <p id="demo"> 32:00</p>
- <button type="button" class="btn btn-info" onclick="myTimerObj.start()">Start counter</button>
- <button type="button" class="btn btn-info" onclick="myTimerObj.resume()">Resume counter</button>
- <button type="button" class="btn btn-info" onclick="myTimerObj.end()">Stop counter</button>
- <button type="button" class="btn btn-info" onlcick="myTimerObj.change()">Endre Tid</button>
-</div>
+          if(paused){ //dette gjør at man kan bruke start som "resume" etter pause
+            paused = false;
+        
+            // update the deadline to preserve the amount of time remaining
+            deadline = new Date(Date.parse(new Date()) + time_left);
+        
+            // start the clock
+            run_clock('clockdiv',deadline);
+          }
+          else{ //om den ikke har vært på pause, som i utgangspunktet kun skal være 1. gang, skal den slette "10:00" teksten
+          var element=document.getElementById('poof'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
+          element.remove();
+          run_clock('clockdiv',deadline);
+          }
+        }
+        
+        
+        function gah(){ //Denne restarter klokka, og den har veldig lyst å hete gah, for den funker ellers ikke
+            if(paused){
+                paused=false;
+                time_in_minutes=10; //setter tiden tilbake til den opprinnelige tiden
+            current_time=Date.parse(new Date()); 
+            deadline=new Date(current_time + time_in_minutes*60*1000);
+            run_clock('clockdiv',deadline); //kjører klokken på nytt med de oppdaterete tidene
+            }
+        }
+        
+        var paused = false; // is the clock paused?
+        var time_left; // time left on the clock when paused
+        
+        function pause_clock(){
+          if(!paused){
+            paused = true;
+            clearInterval(timeinterval); // stop the clock
+            time_left = time_remaining(deadline).total; // preserve remaining time
+          }
+        }
+        
+        function endre_tid(){
+          if(paused){
+          paused=false; //kaos å endre tid mens klokka er i gang, så klokka må stoppes først
+          var endret=document.getElementById('tidJustert').value; //henter nummeret skrevet inn i boksen
+          var j= endret*1000; //gjør om til milisekund, da dette må brukes i Date-funksjonen
+          var sekunder= new Date(Date.parse(new Date()) + time_left); //dette er fra koden som allerede er skrevet, men tror den henter tiden som er igjen på klokka
+          deadline = new Date(sekunder.getTime()+j); //oppdaterer klokka med antall millisekund igjen + antall justert
+        // start the clock
+          run_clock('clockdiv',deadline); //starter klokka med oppdatert tid
+          }
+        }
+        
+        // handle pause and resume button clicks
+        document.getElementById('start').onclick = start_clock;
+        document.getElementById('stop').onclick = gah;
+        document.getElementById('pause').onclick = pause_clock;
+    
+        
+        </script>
+ 
+  <!-- Timer 1 slutt-->
+  <p class="w3-opacity w3-center"><i>Lag 2:</i></p>
+  <!-- Timer 2-->
+  <div id="clockdiv2"></div>
+  <center>
+  <p class="fs-1" id="poof2">10:00</p>
+  <br>
+  <button class="btn btn-success fs-1" id="start2">Start</button>
+  <button id="pause2" class="btn btn-danger fs-1">Stopp</button>
+  <button class="btn btn-info fs-1" id="stop2">Reset</button>
+</center>
+  <br><br>
+  <script>
+  var time_in_minutes2 = 10;
+  var current_time2 = Date.parse(new Date());
+  var deadline2 = new Date(current_time2 + time_in_minutes2*60*1000);
+
+  var timeinterval2;
+  var paused2 = false; // is the clock paused?
+  var time_left2; // time left on the clock when paused
+
+  function start_clock2(){ //starter klokken, vil helst ikke at den skal begynne automatisk
+
+  if(paused2){ //dette gjør at man kan bruke start som "resume" etter pause
+  paused2 = false;
+
+  // update the deadline to preserve the amount of time remaining
+  deadline2 = new Date(Date.parse(new Date()) + time_left2);
+
+  // start the clock
+  run_clock('clockdiv2',deadline2);
+}
+else{ //om den ikke har vært på pause, som i utgangspunktet kun skal være 1. gang, skal den slette "10:00" teksten
+var element=document.getElementById('poof2'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
+element.remove();
+run_clock('clockdiv2',deadline2);
+}
+}
+
+
+function gah2(){ //Denne restarter klokka, og den har veldig lyst å hete gah, for den funker ellers ikke
+  if(paused2){
+      paused2=false;
+      time_in_minutes2=10; //setter tiden tilbake til den opprinnelige tiden
+  current_time2=Date.parse(new Date()); 
+  deadline2=new Date(current_time2 + time_in_minutes2*60*1000);
+  run_clock('clockdiv2',deadline2); //kjører klokken på nytt med de oppdaterete tidene
+  }
+}
+
+
+
+function pause_clock2(){
+  console.log(paused2);
+if(!paused2){
+  paused2 = true;
+  clearInterval(timeinterval2); // stop the clock
+  time_left2 = time_remaining(deadline2).total; // preserve remaining time
+}
+}
+
+function endre_tid2(){
+if(paused2){
+paused2=false; //kaos å endre tid mens klokka er i gang, så klokka må stoppes først
+var endret2=document.getElementById('tidJustert2').value; //henter nummeret skrevet inn i boksen
+var mili2= endret2*1000; //gjør om til milisekund, da dette må brukes i Date-funksjonen
+var sekunder2= new Date(Date.parse(new Date()) + time_left2); //dette er fra koden som allerede er skrevet, men tror den henter tiden som er igjen på klokka
+deadline = new Date(sekunder2.getTime()+mili2); //oppdaterer klokka med antall millisekund igjen + antall justert
+// start the clock
+run_clock('clockdiv2',deadline2); //starter klokka med oppdatert tid
+}
+}
+        // handle pause and resume button clicks
+        document.getElementById('start2').onclick = start_clock2;
+        document.getElementById('stop2').onclick = gah2;
+        document.getElementById('pause2').onclick = pause_clock2;
+</script>
 <!-- Bane 2-->
 <div class="w3-black" id="tour">
   <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
     <h2 class="w3-wide w3-center">BANE 2</h2>
-    <p class="w3-opacity w3-center"><i>tihi hoho</i></p><br>
-    
+    <div align="center">
+      <p>Juster tid for lag 1:</p>
+      <input type="number" id="tidJustert3" value="0">
+      <button type="button" class="btn btn-info" onclick="justerTid3()">Juster Tid</button>
+      </div>
+      <p class="w3-opacity w3-center"><i>Lag 1:</i></p>
       <!-- Timer 2, se kommentarer over-->
 <script>
  
@@ -107,11 +260,12 @@ body {font-family: "Lato", sans-serif}
  var myTimer2;
 
  function start() {
-   myTimer2 = setInterval(myClock, 1000);
-   var d = 5*60;
+   myTimer2 = setInterval(myClock, 10);
+   var et3 = document.getElementById("tidJustert2").value;
+   var d = (2*60*60)+(et3%3600);
 
    function myClock() {
-     document.getElementById("demo2").innerHTML = ~~((--d)%(24*3600*3600)/60)+":" + ~~(--d%60);
+     document.getElementById("demo2").innerHTML = ~~(--d/3600) + ":"+ ~~((d%3600)/60) +":" + ~~(d%60);
      if (d == 0) {
        clearInterval(myTimer2);
        alert("Reached zero");
@@ -132,11 +286,10 @@ body {font-family: "Lato", sans-serif}
 })(document);
 </script>
 <div align="center">
-<p id="demo2">05:00</p>
-<button type="button" class="btn btn-info" onclick="myTimerObj2.start()">Start counter</button>
-<button type="button" class="btn btn-info" onclick="myTimerObj2.pause()">Pause counter</button>
-<button type="button" class="btn btn-info" onclick="myTimerObj2.end()">Stop counter</button>
-<button type="button" class="btn btn-info" onlcick="myTimerObj2.change()">Endre Tid</button>
+<p class="fs-1" id="demo2">2:00:00</p>
+<button type="button" class="btn btn-success" onclick="myTimerObj2.start()">Start Tid</button>
+<button type="button" class="btn btn-secondary" onclick="myTimerObj2.pause()">Timeout</button>
+<button type="button" class="btn btn-danger" onclick="myTimerObj2.end()">Stopp Tid</button>
 </div>
   <!-- The Contact Section -->
  
@@ -148,28 +301,9 @@ body {font-family: "Lato", sans-serif}
       <div class="w3-col m6 w3-large w3-margin-bottom">
         <i class="fa fa-map-marker" style="width:30px"></i> Trondheim; NO<br>
         <i class="fa fa-phone" style="width:30px"></i> Phone: +47 123 45 678<br>
-        <i class="fa fa-envelope" style="width:30px"> </i> Email: mail@mail.com<br>
+        <i class="fa fa-envelope" style="width:30px"> </i> Email: ELSYSerKULT@ELmail.com<br>
       </div>
 
-      <!-- tror ikke vi trenger dette i det hele tatt, men har ikke tatt den bort sånn i tilfelle
-      <div class="w3-col m6">
-        <form action="/action_page.php" target="_blank">
-          <div class="w3-row-padding" style="margin:0 -16px 8px -16px">
-            <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Name" required name="Name">
-            </div>
-            <div class="w3-half">
-              <input class="w3-input w3-border" type="text" placeholder="Email" required name="Email">
-            </div>
-          </div>
-          <input class="w3-input w3-border" type="text" placeholder="Message" required name="Message">
-          <button class="w3-button w3-black w3-section w3-right" type="submit">SEND</button>
-        </form>
-      </div>
-    </div>
-  </div>
-  -->
-<!-- End Page Content -->
 </div>
 
 <!-- Image of location/map -->
