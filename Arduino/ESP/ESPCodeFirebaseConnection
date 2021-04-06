@@ -1,0 +1,84 @@
+//
+// Copyright 2015 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// FirebaseDemo_ESP8266 is a sample that demo the different functions
+// of the FirebaseArduino API.
+#include <ESP8266WiFi.h>
+
+#include <FirebaseArduino.h>
+
+// Set these to run example.
+#define FIREBASE_HOST "elsys-prosj-default-rtdb.firebaseio.com" //firebase host
+#define FIREBASE_AUTH "yBXLp4gx1EVfhEuLPTXmQpvmEP36iZkts1uc7PvL" //firebase auth
+#define WIFI_SSID "ItBurnsWhenIP" //wifi name 
+#define WIFI_PASSWORD "Laktosefritt1" //wifi password
+//#define WIFI_SSID "ElsysGruppe1" //wifi name
+//#define WIFI_PASSWORD "Oktober08" //wifi password
+
+void setup() {
+  Serial.begin(9600);
+
+  // connect to wifi.
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  
+  //Serial.print("connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    //Serial.print(".");
+    delay(500);
+  }
+    //Serial.println();
+    //Serial.print("connected: ");
+    //Serial.println(WiFi.localIP());
+  
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+
+  Firebase.setBool("Connected", true);
+}
+
+int n = 0;
+
+char LagA[] = "00:00";
+char LagB[] = "00:00"; 
+
+byte b = 1; //byte to prove connection with Due
+
+void loop() {
+  Serial.write(b); //Due reads 1 if connected
+  
+  String IncomingString=""; //string with incoming message 
+  boolean StringReady = false; //true if we read a string in Serial
+
+  while (Serial.available()){
+    IncomingString=Serial.readString(); //read string in serial
+    StringReady = true;
+  }
+
+  if (StringReady){
+    for (int i = 0; i < sizeof(LagA)-1; i++){
+      LagA[i] = IncomingString.charAt(i);  //LagA gets the first 5 digits 
+      LagB[i] = IncomingString.charAt(i+5); //LagB gets the next 5 digits
+    }
+    Firebase.setString("LagA", LagA); //The two times are pushed to firebase
+    Firebase.setString("LagB", LagB);
+  }
+  
+  // append a new value to /logs
+  String name = Firebase.pushInt("logs", n++);
+  // handle error
+  if (Firebase.failed()) {
+      return;
+  }
+}
