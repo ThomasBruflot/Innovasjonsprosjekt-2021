@@ -104,11 +104,12 @@ const int wifiLED = 12;
 
 void setup()
 {
-  //Display setup
   Serial.begin(9600);
   Serial3.begin(9600); //Serial port for ESP communication
   while (!Serial); // wait for Arduino Serial Monitor
-  while (!Serial3); // wait for Serial 3 (vet ikke om denne er nødvendig, men skader ikke)
+  while (!Serial3); // wait for Serial 3 
+
+  //Display setup
   SPI.begin();
   tft.begin();
   tft2.begin();
@@ -161,7 +162,11 @@ void setup()
 }
 
 //Setup for ESP communication
-char Stime[] = "00:0000:00"; //Char array with current time and status, to send to ESP
+/ Setup for ESP communication
+char Stime[] = "00:0000:00000"; //Char array with current time and status, to send to ESP
+char A = '0';
+char B = '0';
+char upd = '0';
 
 
 void loop(void)
@@ -173,7 +178,23 @@ void loop(void)
     IncomingByte = Serial3.read();
     ByteReady = true;
   }
-
+  upd = 0;
+  if (startPinAon == true) {
+    A = '1';
+    upd = '1';
+  }
+  if (startPinBon == true) {
+    B = '1';
+    upd = '1';
+  }
+  if (stopPinAon == true) {
+    A = '0';
+    upd = '1';
+  }
+  if (stopPinBon == true) {
+    B = '0';
+    upd = '1';
+  }
   sprintf(secbuf, "%02d", secondsA); //Stime is updated with the current time (er nok penere måter å gjøre dette på)
   sprintf(minbuf, "%02d", minutesA);
   Stime[0] = minbuf[0];
@@ -187,10 +208,19 @@ void loop(void)
   Stime[8] = secbuf[0];
   Stime[9] = secbuf[1];
 
+  Stime[10] = A;
+  Stime[11] = B;
+  Stime[12] = upd;
+
+  //STATUS:
+  //sender alltid update = 1, selv når ikke noe er nytt
+  //Sendes ellers riktig, men ESP leser det feil, og leser alt som true.
+
+
   //Time is sent to the ESP if there is a connection
   if (IncomingByte == 1 ) {
-    Serial3.write(Stime, 11);
-    //Serial.write(Stime, 11); //time is printed out, just for testing
+    Serial3.write(Stime, 14);
+    //Serial.write(Stime, 14); //time is printed out, just for testing
     digitalWrite(wifiLED, HIGH);
   }
 
