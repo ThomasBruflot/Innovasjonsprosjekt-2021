@@ -162,7 +162,6 @@ void setup()
 }
 
 //Setup for ESP communication
-/ Setup for ESP communication
 char Stime[] = "00:0000:00000"; //Char array with current time and status, to send to ESP
 char A = '0';
 char B = '0';
