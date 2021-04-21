@@ -270,8 +270,8 @@ body {font-family: "Lato", sans-serif}
   run_clock2('clockdiv2',deadline2);
 }
 else{ //om den ikke har vært på pause, som i utgangspunktet kun skal være 1. gang, skal den slette "10:00" teksten
-var element=document.getElementById('poof2'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
-element.remove();
+//var element=document.getElementById('poof2'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
+//element.remove();
 run_clock2('clockdiv2',deadline2);
 }
 }
@@ -428,6 +428,10 @@ function myFunction() {
     var sekLagA = parseInt(stringsekLagA); //gjør om sekundene til int
     var minLagA = (sekLagA/60) + parseInt(stringminLagA); //gjør om min til int og konverterer sek til min
     if(oppdatert){
+    var x = '0';
+    firebase.database().ref('LagA/').update({
+      Oppdater: x
+    });
     oppdatertTid(minLagA);
     }
   });
@@ -447,14 +451,26 @@ function myFunction() {
     var stringminLagB = TidArr[0];
     var sekLagB = parseInt(stringsekLagB);
     var minLagB = (sekLagB/60) + parseInt(stringminLagB);
+    pause_clock2();
     if(oppdatert){
+      var x = '0';
+    firebase.database().ref('LagB/').update({
+      Oppdater: x
+    });
     oppdatertTid2(minLagB);
+     if(parseInt(arr[1])){
+      start_clock2();
+    }
+    }
+    else{
+      if(parseInt(arr[1])){
+        start_clock2();
+      }
     }
   });
-  firebase.database().ref('LagA/TellerNed').on('value',(snap3)=>{ //sjekker om Lag A teller ned
-
+  /*firebase.database().ref('LagA/TellerNed').on('value',(snap3)=>{ //sjekker om Lag A teller ned
+    console.log(snap3.val());
     if(parseInt(snap3.val())){
-
       start_clock();
 
     }
@@ -463,7 +479,7 @@ function myFunction() {
     }
   });
   firebase.database().ref('LagB/TellerNed').on('value',(snap4)=>{ //"_" Lag B "_"
-
+  console.log(snap4.val());
     if(parseInt(snap4.val())){
 
       start_clock2();
@@ -472,7 +488,7 @@ function myFunction() {
     else{
       pause_clock2();
     }
-  });
+  });*/
 
 </script>
 </body>
