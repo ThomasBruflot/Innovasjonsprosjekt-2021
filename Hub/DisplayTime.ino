@@ -177,21 +177,24 @@ void loop(void)
     IncomingByte = Serial3.read();
     ByteReady = true;
   }
-  upd = 0;
-  if (startPinAon == true) {
+  
+  if (A == '0' && startPinAon == true) {
     A = '1';
     upd = '1';
   }
-  if (startPinBon == true) {
+  if (B == '0' && startPinBon == true) {
     B = '1';
     upd = '1';
   }
-  if (stopPinAon == true) {
+  if (A == '1' && stopPinAon == true) {
     A = '0';
     upd = '1';
   }
-  if (stopPinBon == true) {
+  if (B == '1' && stopPinBon == true) {
     B = '0';
+    upd = '1';
+  }
+  if(encoderIsActive == true){
     upd = '1';
   }
   sprintf(secbuf, "%02d", secondsA); //Stime is updated with the current time (er nok penere måter å gjøre dette på)
@@ -221,6 +224,9 @@ void loop(void)
     Serial3.write(Stime, 14);
     //Serial.write(Stime, 14); //time is printed out, just for testing
     digitalWrite(wifiLED, HIGH);
+  }
+  else{
+    digitalWrite(wifiLED, LOW);
   }
 
   //Radio communication
