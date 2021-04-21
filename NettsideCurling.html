@@ -1,0 +1,495 @@
+<!-- Oppsett av siden:-->
+<!DOCTYPE html>
+<html lang="en">
+<title>CurlWatch</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<style>
+body {font-family: "Lato", sans-serif}
+.mySlides {display: none}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-black w3-card">
+    <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">HOME</a>
+    <a href="#band" class="w3-bar-item w3-button w3-padding-large w3-hide-small">BANE 1</a>
+    <a href="#tour" class="w3-bar-item w3-button w3-padding-large w3-hide-small">BANE 2</a>
+    <a href="#contact" class="w3-bar-item w3-button w3-padding-large w3-hide-small">CONTACT</a>
+   
+    <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
+  </div>
+</div>
+
+<!-- Navbar on small screens (remove the onclick attribute if you want the navbar to always show on top of the content when clicking on the links) -->
+<div id="navDemo" class="w3-bar-block w3-black w3-hide w3-hide-large w3-hide-medium w3-top" style="margin-top:46px">
+  <a href="#band" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">BANE 1</a>
+  <a href="#tour" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">BANE 2</a>
+  <a href="#contact" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">CONTACT</a>
+</div>
+
+<!-- Page content -->
+<div class="w3-content" style="max-width:2000px;margin-top:46px">
+
+  
+  <!-- Home -->
+  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="">
+    <img src="logoCURLWATCH.png" alt="logo for CurlWatch">
+    <h1 class="text-danger">Tidtakingssystemet for DEG!</h1>
+    <p style="font-size: 17px;"class="w3-center">Curling har lenge gått uten et rimelig og smart tidtakingssystem, men vi presenterer nå løsninen.
+      <br> CurlWatch er et semi-automatisk tidtakingsssytem som kan brukes både til trening og i kamp. 
+      <br> Dommere kan ha oversikt over flere baner samtidig, og behovet for frivillige tidtakere minker. <br>
+    Dette gjør også at man nå har muligheten til å ta tiden i mindre turneringer!</p>
+    <div class="w3-row w3-padding-32">
+        <!-- Bildekarusell-->
+      <div id="myCarousel" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <ol class="carousel-indicators">
+          <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+          <li data-target="#myCarousel" data-slide-to="1"></li>
+          <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>
+      
+        <!-- Wrapper for slides -->
+        <div class="carousel-inner">
+          <div class="item active">
+            <img src="Slides1.png" alt="Los Angeles">
+          </div>
+      
+          <div class="item">
+            <img src="Slides1.png" alt="Chicago">
+          </div>
+      
+          <div class="item">
+            <img src="Slides1.png" alt="New York">
+          </div>
+        </div>
+      
+        <!-- Left and right controls -->
+        <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+          <span class="glyphicon glyphicon-chevron-left"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="right carousel-control" href="#myCarousel" data-slide="next">
+          <span class="glyphicon glyphicon-chevron-right"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+
+      </div>
+    </div>
+  </div>
+<p ></p>
+
+<!-- Bane 1-->
+  <div class="w3-black" id="band">
+    <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+      <h2 class="w3-wide w3-center">BANE 1</h2>
+      <div align="center">
+        <!--<p>Juster tid for lag 1:</p>
+        <input type="number" id="tidJustert" value="0">
+        <button type="button" class="btn btn-info" onclick="endre_tid()">Juster Tid</button> -->
+        </div>
+        <center>
+        <p class="fs-3 text-danger"><i>Lag 1:</i></p>
+      </center>
+        <!-- Timer 1 -->
+        <div id="clockdiv"></div>
+        <center>
+        <br>
+       <!--<button class="btn btn-success fs-1" id="start">Start</button>
+        <button id="pause" class="btn btn-danger fs-1">Stopp</button>
+        <button class="btn btn-info fs-1" id="stop">Reset</button> -->
+      </center>
+        <br><br>
+        <script>
+
+        var NedtellingLagA=false; //denne blir satt helt nederst i koden, det er en variabel som blir hentet fra databasen
+        var NedtelllingLagB=false; //"_"
+        var time_in_minutes = 38; //tiden vi ønsker å telle ned fra
+        var current_time = Date.parse(new Date());
+        var deadline = new Date(current_time + time_in_minutes*60*1000);
+        
+        
+        function time_remaining(endtime){ //Regner ut resterende tid vha. date funksjoner 
+          var t = Date.parse(endtime) - Date.parse(new Date());
+          var seconds = Math.floor( (t/1000) % 60 );
+          var minutes = Math.floor( (t/1000/60) % 60 );
+          var hours = Math.floor( (t/(1000*60*60)) % 24 );
+          var days = Math.floor( t/(1000*60*60*24) );
+          return {'total':t, 'days':days, 'hours':hours, 'minutes':minutes, 'seconds':seconds};
+        }
+        
+        var timeinterval;
+        function run_clock(id,endtime){ 
+          var clock = document.getElementById(id);
+          function update_clock(){
+            var t = time_remaining(endtime);
+            clock.setAttribute('style', 'text-align: center; font-size:38px; display:block;');
+            if(t.seconds>9){
+            clock.innerHTML = t.minutes+':'+t.seconds;
+            }
+            else{
+              clock.innerHTML = t.minutes+':'+"0"+t.seconds ;
+            }
+            if(t.total<=0){ clearInterval(timeinterval); }
+          }
+          update_clock(); // run function once at first to avoid delay
+          timeinterval = setInterval(update_clock,1000);
+        }
+        function start_clock(){ //starter klokken, vil helst ikke at den skal begynne automatisk
+
+          if(paused){ //dette gjør at man kan bruke start som "resume" etter pause
+            paused = false;
+        
+            // update the deadline to preserve the amount of time remaining
+            deadline = new Date(Date.parse(new Date()) + time_left);
+        
+            // start the clock
+            run_clock('clockdiv',deadline);
+          }
+          else{ //om den ikke har vært på pause, som i utgangspunktet kun skal være 1. gang, skal den slette "10:00" teksten
+         // var element=document.getElementById('poof'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
+          //element.remove();
+          run_clock('clockdiv',deadline);
+          }
+        }
+        
+        
+        function gah(){ //Denne restarter klokka, og den har veldig lyst å hete gah, for den funker ellers ikke
+            if(paused){
+                paused=false;
+                time_in_minutes=38; //setter tiden tilbake til den opprinnelige tiden
+            current_time=Date.parse(new Date()); 
+            deadline=new Date(current_time + time_in_minutes*60*1000);
+            run_clock('clockdiv',deadline); //kjører klokken på nytt med de oppdaterete tidene
+            }
+        }
+        function oppdatertTid(Databasetid){
+          time_in_minutes= Databasetid;
+          current_time=Date.parse(new Date()); 
+          deadline=new Date(current_time + time_in_minutes*60*1000);
+          run_clock('clockdiv',deadline); //kjører klokken på nytt med de oppdaterete tidene
+          clearInterval(timeinterval); // stop the clock
+          time_left = time_remaining(deadline).total;
+        }
+        
+        var paused = false; // is the clock paused?
+        var time_left; // time left on the clock when paused
+        
+        function pause_clock(){
+          if(!paused){
+            paused = true;
+            clearInterval(timeinterval); // stop the clock
+            time_left = time_remaining(deadline).total; // preserve remaining time
+          }
+        }
+        
+        function endre_tid(){
+          if(paused){
+          paused=false; //kaos å endre tid mens klokka er i gang, så klokka må stoppes først
+          var endret=document.getElementById('tidJustert').value; //henter nummeret skrevet inn i boksen
+          var j= endret*1000; //gjør om til milisekund, da dette må brukes i Date-funksjonen
+          var sekunder= new Date(Date.parse(new Date()) + time_left); //dette er fra koden som allerede er skrevet, men tror den henter tiden som er igjen på klokka
+          deadline = new Date(sekunder.getTime()+j); //oppdaterer klokka med antall millisekund igjen + antall justert
+        // start the clock
+          run_clock('clockdiv',deadline); //starter klokka med oppdatert tid
+          }
+        }
+        // --- STARTE OG STOPPE TID FRA HUB VHA. FIREBASE ---
+        //LAG A: 
+
+        // handle pause and resume button clicks
+       // document.getElementById('start').onclick = start_clock;
+       // document.getElementById('stop').onclick = gah;
+        //document.getElementById('pause').onclick = pause_clock;
+    
+        
+        </script>
+ 
+  <!-- Timer 1 slutt-->
+  <center>
+  <p class="fs-3 text-warning"><i>Lag 2:</i></p>
+  <!-- Timer 2-->
+  <center>
+ <!-- <p>Juster tid for lag 2:</p>
+  <input type="number" id="tidJustert2" value="0">
+  <button type="button" class="btn btn-info" onclick="endre_tid2()">Juster Tid</button> -->
+  <center>
+  <div id="clockdiv2"></div>
+  <center>
+
+  <br>
+  <!--<button class="btn btn-success fs-1" id="start2">Start</button>
+  <button id="pause2" class="btn btn-danger fs-1">Stopp</button>
+  <button class="btn btn-info fs-1" id="stop2">Reset</button> -->
+</center>
+  <br><br>
+  <script>
+  var time_in_minutes2 = 38;
+  var current_time2 = Date.parse(new Date());
+  var deadline2 = new Date(current_time2 + time_in_minutes2*60*1000);
+
+  var timeinterval2;
+  var paused2 = false; // is the clock paused?
+  var time_left2; // time left on the clock when paused
+  function run_clock2(id,endtime){
+          var clock = document.getElementById(id);
+          function update_clock(){
+            var t = time_remaining(endtime);
+            clock.setAttribute('style', 'text-align: center; font-size:38px; display:block;');
+            if(t.seconds>9){
+            clock.innerHTML = t.minutes+':'+t.seconds;
+            }
+            else{
+              clock.innerHTML = t.minutes+':'+"0"+t.seconds ;
+            }
+            if(t.total<=0){ clearInterval(timeinterval2); }
+          }
+          update_clock(); // run function once at first to avoid delay
+          timeinterval2 = setInterval(update_clock,1000);
+        }
+  function start_clock2(){ //starter klokken, vil helst ikke at den skal begynne automatisk
+
+  if(paused2){ //dette gjør at man kan bruke start som "resume" etter pause
+  paused2 = false;
+
+  // update the deadline to preserve the amount of time remaining
+  deadline2 = new Date(Date.parse(new Date()) + time_left2);
+
+  // start the clock
+  run_clock2('clockdiv2',deadline2);
+}
+else{ //om den ikke har vært på pause, som i utgangspunktet kun skal være 1. gang, skal den slette "10:00" teksten
+//var element=document.getElementById('poof2'); //her fjerner man tiden som står før timeren starter, slik at ikke siden er tom
+//element.remove();
+run_clock2('clockdiv2',deadline2);
+}
+}
+function oppdatertTid2(Databasetid){
+          time_in_minutes2= Databasetid;
+          current_time2=Date.parse(new Date()); 
+          deadline2=new Date(current_time2 + time_in_minutes2*60*1000);
+          run_clock2('clockdiv2',deadline2); //kjører klokken på nytt med de oppdaterete tidene
+          clearInterval(timeinterval2); // stop the clock
+          time_left2 = time_remaining(deadline2).total;
+        }
+
+function gah2(){ //Denne restarter klokka, og den har veldig lyst å hete gah, for den funker ellers ikke
+  if(paused2){
+      paused2=false;
+      time_in_minutes2=10; //setter tiden tilbake til den opprinnelige tiden
+  current_time2=Date.parse(new Date()); 
+  deadline2=new Date(current_time2 + time_in_minutes2*60*1000);
+  run_clock2('clockdiv2',deadline2); //kjører klokken på nytt med de oppdaterete tidene
+  }
+}
+
+
+
+function pause_clock2(){
+  //console.log(paused2);
+if(!paused2){
+  paused2 = true;
+  clearInterval(timeinterval2); // stop the clock
+  time_left2 = time_remaining(deadline2).total; // preserve remaining time
+}
+}
+
+function endre_tid2(){
+if(paused2){
+paused2=false; //kaos å endre tid mens klokka er i gang, så klokka må stoppes først
+var endret2=document.getElementById('tidJustert2').value; //henter nummeret skrevet inn i boksen
+var mili2= endret2*1000; //gjør om til milisekund, da dette må brukes i Date-funksjonen
+var sekunder2= new Date(Date.parse(new Date()) + time_left2); //dette er fra koden som allerede er skrevet, men tror den henter tiden som er igjen på klokka
+deadline2 = new Date(sekunder2.getTime()+mili2); //oppdaterer klokka med antall millisekund igjen + antall justert
+// start the clock
+run_clock2('clockdiv2',deadline2); //starter klokka med oppdatert tid
+}
+}
+        // handle pause and resume button clicks
+        //document.getElementById('start2').onclick = start_clock2;
+       // document.getElementById('stop2').onclick = gah2;
+        //document.getElementById('pause2').onclick = pause_clock2;
+</script>
+<!-- Bane 2 -->
+<div class="w3-black" id="tour">
+  <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+    <h2 class="w3-wide w3-center">BANE 2</h2>
+    <div align="center">
+     <!-- <p>Juster tid for lag 1:</p>
+      <input type="number" id="tidJustert3" value="0">
+      <button type="button" class="btn btn-info" onclick="justerTid3()">Juster Tid</button> -->
+      </div>
+      <p class="fs-3 text-danger"><i>Lag 1:</i></p> 
+      <p style="font-size:38px">38:00</p>
+      <p class="fs-3 text-warning"><i>Lag 2:</i></p>
+      <p style="font-size:38px">35:20</p>
+      <!-- Timer 2, se kommentarer over--> 
+
+</script>
+<div align="center">
+
+</div>
+  <!-- The Contact Section -->
+ 
+  <div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="contact">
+    <h2 class="w3-wide w3-center">CONTACT</h2>
+
+    <p class="w3-opacity w3-center"><i>Du kan kontakte oss her!</i></p>
+  
+    <div class="w3-row w3-padding-32">
+
+        <i class="fa fa-map-marker" style="width:30px"></i> Trondheim; NO<br>
+        <i class="fa fa-phone" style="width:30px"></i> Phone: +47 123 45 678<br>
+        <i class="fa fa-envelope" style="width:30px"> </i> Email: ELSYSerKULT@ELmail.com<br>
+
+</div>
+
+<!-- Image of location/map -->
+<img src="kartGløs.png" class="w3-image w3-greyscale-min" style="width:100%">
+
+<!-- Footer -->
+<footer class="w3-container w3-padding-64 w3-center w3-opacity w3-light-grey w3-xlarge">
+  <i class="fa fa-facebook-official w3-hover-opacity"></i>
+  <i class="fa fa-instagram w3-hover-opacity"></i>
+  <i class="fa fa-snapchat w3-hover-opacity"></i>
+  <i class="fa fa-pinterest-p w3-hover-opacity"></i>
+  <i class="fa fa-twitter w3-hover-opacity"></i>
+  <i class="fa fa-linkedin w3-hover-opacity"></i>
+</footer>
+
+<script>
+
+
+// Used to toggle the menu on small screens when clicking on the menu button
+function myFunction() {
+  var x = document.getElementById("navDemo");
+  if (x.className.indexOf("w3-show") == -1) {
+    x.className += " w3-show";
+  } else { 
+    x.className = x.className.replace(" w3-show", "");
+  }
+}
+
+
+</script>
+
+<!-- FIREBASE -->
+<p id="firebaseTid"></p>
+<p id="firebaseTid2"></p>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyB0h7E-fy3AhExJ5h2lwSysfU8RThsJKjU",
+    authDomain: "elsys-prosj.firebaseapp.com",
+    databaseURL: "https://elsys-prosj-default-rtdb.firebaseio.com",
+    projectId: "elsys-prosj",
+    storageBucket: "elsys-prosj.appspot.com",
+    messagingSenderId: "895351119168",
+    appId: "1:895351119168:web:81b71f8b489fc263466ea5"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  //      henter data:
+  
+
+  firebase.database().ref('LagA').on('value',(snap)=>{ //Tid LagA
+    var arr =[]; //lager et array for å samle inn data
+    var i = 0;
+    snap.forEach((childSnap)=> { //itererer gjennom array for å hente ut data 
+      var childData = childSnap.val();
+      arr[i]=childData
+      i += 1;
+    });
+    var tidLagA = arr[2]; // henter tiden som ligger inne
+    
+    var oppdatert = parseInt(arr[0]); //henter variabelen for om klokka er oppdatert
+    var TidArr = tidLagA.split(":"); //splitter tiden, som er i formaten "xx:xx"
+    var stringsekLagA = TidArr[1]; //Henter ut sekundene som string
+    var stringminLagA = TidArr[0]; //Henter ut minuttene som string
+    var sekLagA = parseInt(stringsekLagA); //gjør om sekundene til int
+    var minLagA = (sekLagA/60) + parseInt(stringminLagA); //gjør om min til int og konverterer sek til min
+    if(oppdatert){
+    var x = '0';
+    firebase.database().ref('LagA/').update({
+      Oppdater: x
+    });
+    oppdatertTid(minLagA);
+    }
+  });
+  firebase.database().ref('LagB').on('value',(snap2)=>{ //Tid LagB, samme som over
+    var arr =[];
+    var i = 0;
+    snap2.forEach((childSnap)=> {
+      var childData = childSnap.val();
+      arr[i]=childData
+      i += 1;
+    });
+    var tidLagB = arr[2];
+    
+    var oppdatert = parseInt(arr[0]);
+    var TidArr = tidLagB.split(":");
+    var stringsekLagB = TidArr[1];
+    var stringminLagB = TidArr[0];
+    var sekLagB = parseInt(stringsekLagB);
+    var minLagB = (sekLagB/60) + parseInt(stringminLagB);
+    pause_clock2();
+    if(oppdatert){
+      var x = '0';
+    firebase.database().ref('LagB/').update({
+      Oppdater: x
+    });
+    oppdatertTid2(minLagB);
+     if(parseInt(arr[1])){
+      start_clock2();
+    }
+    }
+    else{
+      if(parseInt(arr[1])){
+        start_clock2();
+      }
+    }
+  });
+  /*firebase.database().ref('LagA/TellerNed').on('value',(snap3)=>{ //sjekker om Lag A teller ned
+    console.log(snap3.val());
+    if(parseInt(snap3.val())){
+      start_clock();
+
+    }
+    else{
+      pause_clock();
+    }
+  });
+  firebase.database().ref('LagB/TellerNed').on('value',(snap4)=>{ //"_" Lag B "_"
+  console.log(snap4.val());
+    if(parseInt(snap4.val())){
+
+      start_clock2();
+
+    }
+    else{
+      pause_clock2();
+    }
+  });*/
+
+</script>
+</body>
+</html>
