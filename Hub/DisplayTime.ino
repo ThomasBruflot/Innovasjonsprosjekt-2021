@@ -66,6 +66,7 @@ const int stopPinA = 33;
 const int ledA = 28;
 bool startPinAon = false;
 bool stopPinAon = true;
+int stopPressCountA = 0;
 
 //Variables for buttons and leds for team B
 const int startPinB = 26;
@@ -73,6 +74,7 @@ const int stopPinB = 27;
 const int ledB = 31;
 bool startPinBon = false;
 bool stopPinBon = true;
+int stopPressCountB = 0;
 
 //Variables for rotary encoder
 const int encoderDT = 2; //Må være koblet til pin 2 for å fungere optimalt
@@ -84,8 +86,8 @@ int lastEncoderValue = encoderValue;
 bool encoderIsActive = false;
 
 //debounce button on rotary encoder
-long debouncing_time = 25; //Debouncing Time in Milliseconds
-volatile unsigned long last_micros;
+long debouncing_time = 200; //Debouncing Time in Milliseconds
+volatile unsigned long last_micros = 0;
 
 ILI9341_due chosenDisplay = tft;
 bool Display = 0; //0 for display A, and 1 for display B
@@ -107,7 +109,7 @@ void setup()
   Serial.begin(9600);
   Serial3.begin(9600); //Serial port for ESP communication
   while (!Serial); // wait for Arduino Serial Monitor
-  while (!Serial3); // wait for Serial 3 
+  while (!Serial3); // wait for Serial 3
 
   //Display setup
   SPI.begin();
@@ -157,7 +159,7 @@ void setup()
   radio.openReadingPipe(0, thisSlaveAddress);
   radio.startListening();
 
-  digitalWrite(wifiLED, LOW);
+  digitalWrite(wifiLED, LOW); //turns of blue wifi LED
 
 }
 
@@ -177,24 +179,21 @@ void loop(void)
     IncomingByte = Serial3.read();
     ByteReady = true;
   }
-  
-  if (A == '0' && startPinAon == true) {
+  upd = 0;
+  if (startPinAon == true) {
     A = '1';
     upd = '1';
   }
-  if (B == '0' && startPinBon == true) {
+  if (startPinBon == true) {
     B = '1';
     upd = '1';
   }
-  if (A == '1' && stopPinAon == true) {
+  if (stopPinAon == true) {
     A = '0';
     upd = '1';
   }
-  if (B == '1' && stopPinBon == true) {
+  if (stopPinBon == true) {
     B = '0';
-    upd = '1';
-  }
-  if(encoderIsActive == true){
     upd = '1';
   }
   sprintf(secbuf, "%02d", secondsA); //Stime is updated with the current time (er nok penere måter å gjøre dette på)
@@ -220,13 +219,9 @@ void loop(void)
 
 
   //Time is sent to the ESP if there is a connection
-  if (IncomingByte == 1 ) {
+  if (ByteReady == 1 ) {
     Serial3.write(Stime, 14);
-    //Serial.write(Stime, 14); //time is printed out, just for testing
     digitalWrite(wifiLED, HIGH);
-  }
-  else{
-    digitalWrite(wifiLED, LOW);
   }
 
   //Radio communication
@@ -254,27 +249,27 @@ void loop(void)
 
 //What happens when start button for team A is pressed
 void startA() {
-  //Serial.println("StartA");
-  stopB();
-  digitalWrite(ledA, HIGH);
-  startPinAon = true;
-  stopPinAon = false;
+  if (encoderIsActive == false) {
+    stopB();
+    digitalWrite(ledA, HIGH);
+    startPinAon = true;
+    stopPinAon = false;
+  }
 }
 
 //What happens when start button for team B is pressed
 void startB() {
-  //Serial.println("StartB");
+  if (encoderIsActive == false) {
+    stopA();
+    digitalWrite(ledB, HIGH);
+    startPinBon = true;
+    stopPinBon = false;
+  }
 
-  stopA();
-  digitalWrite(ledB, HIGH);
-  startPinBon = true;
-  stopPinBon = false;
 }
 
 //What happens when stop button for team A is pressed
 void stopA() {
-  //Serial.println("StoppA");
-
   digitalWrite(ledA, LOW);
   startPinAon = false;
   stopPinAon = true;
@@ -282,8 +277,6 @@ void stopA() {
 
 //What happens when stop button for team B is pressed
 void stopB() {
-  //Serial.println("StoppB");
-
   digitalWrite(ledB,  LOW);
   startPinBon = false;
   stopPinBon = true;
@@ -344,12 +337,12 @@ unsigned long defaultScreen() {
   //Display 1
   renderTime(secondsA, minutesA, lastSecondsA, lastMinutesA, TimeA, tft);
   printText(":", 156, 25, 7, ILI9341_WHITE, tft); //line 2 text
-  printText("Time adjusted: ", 0, 180, 1, ILI9341_WHITE, tft);
+  printText("Time adjusted: ", 0, 180, 2, ILI9341_WHITE, tft);
 
   //Display 2
   renderTime(secondsB, minutesB, lastSecondsB, lastMinutesB, TimeB, tft2);
   printText(":", 156, 25, 7, ILI9341_WHITE, tft2); //line 2 text
-  printText("Time adjusted: ", 0, 180, 1, ILI9341_WHITE, tft2);
+  printText("Time adjusted: ", 0, 180, 2, ILI9341_WHITE, tft2);
 
   return micros() - start;
 }
@@ -357,19 +350,22 @@ unsigned long defaultScreen() {
 
 //Variables for calculating positions for nubers in time adjustments
 //for textsize 2, pixelwidth including 2 pixel spacing:
-uint8_t digit = 12;
-uint8_t doubleDigit = 20;
-uint8_t negDigit = 20;
-uint8_t doubleNegDigit = 24;
-uint8_t barWidth = 4;
-
+int digit = 14;
+int doubleDigit = 32;
+int trippleDigit = 50;
+int negDigit = 26;
+int doubleNegDigit = 44;
+int trippleNegDigit = 60;
+int barWidth = 4;
+int textSize = 2;
 //Function to add adjusted time to the screen
 unsigned long timeadjustments(int adjustments[], ILI9341_due& screen) {
   unsigned long start = micros();
-  screen.fillRect(0, 200, 300, 20, ILI9341_BLACK); //paint a black square over past adjustments
+  int xpos = 6;     //express the x position of timeadjustment
+  int ypos = 210;   //express the y position of timeadjustment
+  screen.fillRect(0, ypos, 300, 20, ILI9341_BLACK); //paint a black square over past adjustments w=300, h=20
 
-  printText("|", 0, 200, 1, ILI9341_WHITE, tft); //prints first bar
-  int xpos = 6;                                  //express the x position of timeadjustment
+  printText("|", 0, ypos - 3, textSize, ILI9341_WHITE, tft); //prints first bar
 
   for (int i = 0; i < arrayLength; i++) { //goes through adjustments array
     //Wont write 0's out
@@ -379,30 +375,44 @@ unsigned long timeadjustments(int adjustments[], ILI9341_due& screen) {
 
     //numbers from 0-9
     else if (adjustments[i] >= 0 && adjustments[i] < 10) {
-      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
-      printText("|", xpos + digit, 200, 1, ILI9341_WHITE, screen);
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_SPRINGGREEN, screen);
+      printText("|", xpos + digit, ypos - 3, textSize, ILI9341_WHITE, screen);
       xpos += digit + barWidth;
     }
 
-    //numbers over 9
-    else if (adjustments[i] >= 10)    {
-      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_GREEN, screen);
-      printText("|", xpos + doubleDigit, 200, 1, ILI9341_WHITE, screen);
+    //numbers from 10-99
+    else if (adjustments[i] >= 10 && adjustments[i] < 100)    {
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_SPRINGGREEN, screen);
+      printText("|", xpos + doubleDigit, ypos - 3, textSize, ILI9341_WHITE, screen);
       xpos += doubleDigit + barWidth;
+    }
+
+    //numbers from 100-999
+    else if (adjustments[i] >= 100)    {
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_SPRINGGREEN, screen);
+      printText("|", xpos + trippleDigit, ypos - 3, textSize, ILI9341_WHITE, screen);
+      xpos += trippleDigit + barWidth;
     }
 
     //negative numbers from 0-9
     else if (adjustments[i] < 0 && adjustments[i] > -10)    {
-      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
-      printText("|", xpos + negDigit, 200, 1, ILI9341_WHITE, screen);
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_RED, screen);
+      printText("|", xpos + negDigit, ypos - 3, textSize, ILI9341_WHITE, screen);
       xpos += negDigit + barWidth;
     }
 
-    //negativ numbers <= -10
-    else if (adjustments[i] <= -10)    {
-      printText(String(adjustments[i]), xpos, 200, 1, ILI9341_RED, screen);
-      printText("|", xpos + doubleNegDigit, 200, 1, ILI9341_WHITE, screen);
+    //negativ numbers from 10-99
+    else if (adjustments[i] <= -10 && adjustments[i] > -100)    {
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_RED, screen);
+      printText("|", xpos + doubleNegDigit, ypos - 3, textSize, ILI9341_WHITE, screen);
       xpos += doubleNegDigit + barWidth;
+    }
+
+    //negativ numbers from 100-999
+    else if (adjustments[i] <= -100)    {
+      printText(String(adjustments[i]), xpos, ypos, textSize, ILI9341_RED, screen);
+      printText("|", xpos + trippleNegDigit, ypos - 3, textSize, ILI9341_WHITE, screen);
+      xpos += trippleNegDigit + barWidth;
     }
   }
   return micros() - start;
