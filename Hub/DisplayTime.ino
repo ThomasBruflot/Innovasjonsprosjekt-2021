@@ -9,16 +9,16 @@
 #include <RF24.h>
 
 //DISPLAY 1: 
-#define TFT_RST 22
-#define TFT_DC 23
-#define TFT_CS 4
+#define TFT_RST 22 //RST is connected to pin 22 
+#define TFT_DC 23 //DC is connected to pin 23
+#define TFT_CS 4 //CS is connected to pin 4
 //Use hardware SPI for MISO, MOSI and CLK, https://www.arduino.cc/en/Reference/SPI
 ILI9341_due tftA = ILI9341_due(TFT_CS, TFT_DC, TFT_RST);
 
 //DISPLAY 2
-#define TFT_RST2 24
-#define TFT_DC2 25
-#define TFT_CS2 10
+#define TFT_RST2 24 //RST is connected to pin 24
+#define TFT_DC2 25 //DC is connected to pin 25
+#define TFT_CS2 10 //CS is connected to pin 10
 //Use hardware SPI for MISO, MOSI and CLK, https://www.arduino.cc/en/Reference/SPI
 ILI9341_due tftB = ILI9341_due(TFT_CS2, TFT_DC2, TFT_RST2);
 
