@@ -1,1 +1,1 @@
-Her ligger all koden som skal lastes opp på Arduino Due. Mappen disse tre filene skal ligge i må hete "DisplayTime".
+Her ligger all koden som skal lastes opp på Mikrokontrollerne i Hub'en. Filen "ESPCodeFirebaseConnection" skal lastes opp på ESP'en, mens de andre filene skal lastes opp på Duen. Mappen disse tre filene skal ligge i må hete "DisplayTime".
