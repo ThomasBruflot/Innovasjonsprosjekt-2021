@@ -162,39 +162,41 @@ void setup()
 }
 
 //Setup for ESP communication
-char Stime[] = "00:0000:00000"; //Char array with current time and status, to send to ESP
-char A = '0';
-char B = '0';
-char upd = '0';
+char Stime[] = "00:0000:00000"; //Char array with current time and status, is later sent to ESP via Serial 3
+char A = '0'; //Single Char that indicates if Team A's time is counting down or not (1 if counting down, 0 if not)
+char B = '0'; //Single Char that indicates if Team B's time is counting down or not (1 if counting down, 0 if not)
+char upd = '0'; //Single Char that indicates if there has been a change in the status of the times (1 is it has, 0 if not)
 
 
 void loop(void)
 {
   byte IncomingByte = 0; //IncomingByte is set to 1 when ESP and Due have a connection
-  boolean ByteReady = false;
+  boolean ByteReady = false; //boolean indicating if there has has been read a message in Serial 3 or not 
 
-  while (Serial3.available()) {
+  while (Serial3.available()) { //IncomingByte is set to 1 if there is a connectin with ESP, and ByteReady is set to true
     IncomingByte = Serial3.read();
     ByteReady = true;
   }
-  upd = 0;
-  if (startPinAon == true) {
-    A = '1';
+  upd = 0; //upd is initially set to 0
+  //upd is set to 1 if any of the times are stoped, started or changed
+  if (startPinAon == true) { //checks if start button A is pressed
+    A = '1'; //A is set to 1 if team A's time is counting
     upd = '1';
   }
-  if (startPinBon == true) {
-    B = '1';
+  if (startPinBon == true) { //checks if start button B is pressed
+    B = '1'; //B is set to 1 if team B's time is counting
     upd = '1';
   }
-  if (stopPinAon == true) {
-    A = '0';
+  if (stopPinAon == true) { //checks if stop button A is pressed
+    A = '0'; //A is set to 0 if team B's time is stoped
     upd = '1';
   }
-  if (stopPinBon == true) {
-    B = '0';
+  if (stopPinBon == true) { //checks if stop button B is pressed
+    B = '0'; //B is set to 0 if team B's time is stoped
     upd = '1';
   }
-  sprintf(secbuf, "%02d", secondsA); //Stime is updated with the current time (er nok penere måter å gjøre dette på)
+  //Stime is updated with the current time and status of the game 
+  sprintf(secbuf, "%02d", secondsA); 
   sprintf(minbuf, "%02d", minutesA);
   Stime[0] = minbuf[0];
   Stime[1] = minbuf[1];
@@ -206,20 +208,15 @@ void loop(void)
   Stime[6] = minbuf[1];
   Stime[8] = secbuf[0];
   Stime[9] = secbuf[1];
-
   Stime[10] = A;
   Stime[11] = B;
   Stime[12] = upd;
 
-  //STATUS:
-  //sender alltid update = 1, selv når ikke noe er nytt
-  //Sendes ellers riktig, men ESP leser det feil, og leser alt som true.
-
 
   //Time is sent to the ESP if there is a connection
   if (ByteReady == 1 ) {
-    Serial3.write(Stime, 14);
-    digitalWrite(wifiLED, HIGH);
+    Serial3.write(Stime, 14); //time and status data is sent to the ESP via Serial communication
+    digitalWrite(wifiLED, HIGH); //the blue WIFI led is turned on when there is an established connection with the ESP 
   }
 
   //Radio communication
