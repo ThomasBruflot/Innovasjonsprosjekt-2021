@@ -45,9 +45,9 @@ body {font-family: "Lato", sans-serif}
   <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="">
     <img src="logoCURLWATCH.png" alt="logo for CurlWatch">
     <h1 class="text-danger">Tidtakingssystemet for DEG!</h1>
-    <p style="font-size: 17px;"class="w3-center">Curling har lenge gått uten et rimelig og smart tidtakingssystem, men vi presenterer nå løsninen.
+    <p style="font-size: 17px;"class="w3-center">Curling har lenge gått uten et rimelig og smart tidtakingssystem, men vi presenterer nå løsningen.
       <br> CurlWatch er et semi-automatisk tidtakingsssytem som kan brukes både til trening og i kamp. 
-      <br> Dommere kan ha oversikt over flere baner samtidig, og behovet for frivillige tidtakere minker. <br>
+      <br> Dommere kan ha oversikt over flere baner samtidig, og behovet for frivillige tidtakere reduseres. <br>
     Dette gjør også at man nå har muligheten til å ta tiden i mindre turneringer!</p>
     <div class="w3-row w3-padding-32">
         <!-- Bildekarusell-->
@@ -62,15 +62,15 @@ body {font-family: "Lato", sans-serif}
         <!-- Wrapper for slides -->
         <div class="carousel-inner">
           <div class="item active">
-            <img src="Slides1.png" alt="Los Angeles">
+            <img src="Gruppebilde.png" alt="Los Angeles">
           </div>
       
           <div class="item">
-            <img src="Slides1.png" alt="Chicago">
+            <img src="IMG_3457.png" alt="Chicago">
           </div>
       
           <div class="item">
-            <img src="Slides1.png" alt="New York">
+            <img src="IMG_3463.png" alt="New York">
           </div>
         </div>
       
@@ -95,17 +95,19 @@ body {font-family: "Lato", sans-serif}
     <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
       <h2 class="w3-wide w3-center">BANE 1</h2>
       <div align="center">
-        <!--<p>Juster tid for lag 1:</p>
+        <!-- Dette er kommentert ut for nå, men kan være nyttig for videre utvikling av nettsiden-->
+        <!--<p>Juster tid for lag 1:</p> 
         <input type="number" id="tidJustert" value="0">
         <button type="button" class="btn btn-info" onclick="endre_tid()">Juster Tid</button> -->
         </div>
         <center>
-        <p class="fs-3 text-danger"><i>Lag 1:</i></p>
+        <p class="fs-3 text-danger">TEAM A</p>
       </center>
         <!-- Timer 1 -->
         <div id="clockdiv"></div>
         <center>
         <br>
+        <!-- knapper for å justere tiden, som ikke enda er implementert-->
        <!--<button class="btn btn-success fs-1" id="start">Start</button>
         <button id="pause" class="btn btn-danger fs-1">Stopp</button>
         <button class="btn btn-info fs-1" id="stop">Reset</button> -->
@@ -113,8 +115,7 @@ body {font-family: "Lato", sans-serif}
         <br><br>
         <script>
 
-        var NedtellingLagA=false; //denne blir satt helt nederst i koden, det er en variabel som blir hentet fra databasen
-        var NedtelllingLagB=false; //"_"
+
         var time_in_minutes = 38; //tiden vi ønsker å telle ned fra
         var current_time = Date.parse(new Date());
         var deadline = new Date(current_time + time_in_minutes*60*1000);
@@ -206,6 +207,7 @@ body {font-family: "Lato", sans-serif}
           }
         }
         // --- STARTE OG STOPPE TID FRA HUB VHA. FIREBASE ---
+        // gir funksjonalitet til knappene, men dette er ikke enda implementert
         //LAG A: 
 
         // handle pause and resume button clicks
@@ -218,9 +220,10 @@ body {font-family: "Lato", sans-serif}
  
   <!-- Timer 1 slutt-->
   <center>
-  <p class="fs-3 text-warning"><i>Lag 2:</i></p>
+  <p class="fs-3 text-warning">TEAM B</p>
   <!-- Timer 2-->
   <center>
+ <!-- Det som er kommentert ut her er det samme som for timeren over-->
  <!-- <p>Juster tid for lag 2:</p>
   <input type="number" id="tidJustert2" value="0">
   <button type="button" class="btn btn-info" onclick="endre_tid2()">Juster Tid</button> -->
@@ -276,6 +279,7 @@ run_clock2('clockdiv2',deadline2);
 }
 }
 function oppdatertTid2(Databasetid){
+          //clearInterval(timeinterval2);
           time_in_minutes2= Databasetid;
           current_time2=Date.parse(new Date()); 
           deadline2=new Date(current_time2 + time_in_minutes2*60*1000);
@@ -330,9 +334,9 @@ run_clock2('clockdiv2',deadline2); //starter klokka med oppdatert tid
       <input type="number" id="tidJustert3" value="0">
       <button type="button" class="btn btn-info" onclick="justerTid3()">Juster Tid</button> -->
       </div>
-      <p class="fs-3 text-danger"><i>Lag 1:</i></p> 
+      <p class="fs-3 text-danger">TEAM A</p> 
       <p style="font-size:38px">38:00</p>
-      <p class="fs-3 text-warning"><i>Lag 2:</i></p>
+      <p class="fs-3 text-warning">TEAM B</p>
       <p style="font-size:38px">35:20</p>
       <!-- Timer 2, se kommentarer over--> 
 
@@ -419,22 +423,26 @@ function myFunction() {
       arr[i]=childData
       i += 1;
     });
-    var tidLagA = arr[2]; // henter tiden som ligger inne
     
     var oppdatert = parseInt(arr[0]); //henter variabelen for om klokka er oppdatert
-    var TidArr = tidLagA.split(":"); //splitter tiden, som er i formaten "xx:xx"
-    var stringsekLagA = TidArr[1]; //Henter ut sekundene som string
-    var stringminLagA = TidArr[0]; //Henter ut minuttene som string
-    var sekLagA = parseInt(stringsekLagA); //gjør om sekundene til int
-    var minLagA = (sekLagA/60) + parseInt(stringminLagA); //gjør om min til int og konverterer sek til min
-    if(oppdatert){
-    var x = '0';
-    firebase.database().ref('LagA/').update({
-      Oppdater: x
-    });
-    oppdatertTid(minLagA);
-    }
-  });
+    var nedtell = parseInt(arr[1]);
+    if(oppdatert){ // her skal 'Oppdatert' settes til null, men dette er enda litt ustabilt og er for øyeblikket kommentert ut
+      /*var x= '0';
+      firebase.database().ref('LagA/').update({
+        Oppdater: x
+      });*/
+      clearInterval(timeinterval); //stopper klokken for å unngå feil
+      var tidLagA = arr[2];
+      var TidArr = tidLagA.split(":");
+      var stringsekLagA = TidArr[1];
+      var stringminLagA = TidArr[0];
+      var sekLagA = parseInt(stringsekLagA);
+      var minLagA = (sekLagA/60) + parseInt(stringminLagA);
+      oppdatertTid(minLagA);
+      if(nedtell){
+        start_clock();
+      }
+  }});
   firebase.database().ref('LagB').on('value',(snap2)=>{ //Tid LagB, samme som over
     var arr =[];
     var i = 0;
@@ -443,52 +451,27 @@ function myFunction() {
       arr[i]=childData
       i += 1;
     });
-    var tidLagB = arr[2];
-    
+    var nedtelle = parseInt(arr[1]);
     var oppdatert = parseInt(arr[0]);
-    var TidArr = tidLagB.split(":");
-    var stringsekLagB = TidArr[1];
-    var stringminLagB = TidArr[0];
-    var sekLagB = parseInt(stringsekLagB);
-    var minLagB = (sekLagB/60) + parseInt(stringminLagB);
-    pause_clock2();
     if(oppdatert){
-      var x = '0';
-    firebase.database().ref('LagB/').update({
-      Oppdater: x
-    });
-    oppdatertTid2(minLagB);
-     if(parseInt(arr[1])){
-      start_clock2();
-    }
-    }
-    else{
-      if(parseInt(arr[1])){
+      var x= '0';
+      /*firebase.database().ref('LagB/').update({
+        Oppdater: x
+      });*/
+      clearInterval(timeinterval2);
+      var tidLagB = arr[2];
+      var TidArr = tidLagB.split(":");
+      var stringsekLagB = TidArr[1];
+      var stringminLagB = TidArr[0];
+      var sekLagB = parseInt(stringsekLagB);
+      var minLagB = (sekLagB/60) + parseInt(stringminLagB);
+      oppdatertTid2(minLagB);
+      if(nedtelle){
         start_clock2();
       }
-    }
-  });
-  /*firebase.database().ref('LagA/TellerNed').on('value',(snap3)=>{ //sjekker om Lag A teller ned
-    console.log(snap3.val());
-    if(parseInt(snap3.val())){
-      start_clock();
-
-    }
-    else{
-      pause_clock();
-    }
-  });
-  firebase.database().ref('LagB/TellerNed').on('value',(snap4)=>{ //"_" Lag B "_"
-  console.log(snap4.val());
-    if(parseInt(snap4.val())){
-
-      start_clock2();
-
-    }
-    else{
-      pause_clock2();
-    }
-  });*/
+      }
+    });
+    
 
 </script>
 </body>
