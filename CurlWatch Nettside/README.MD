@@ -1,1 +1,1 @@
-Her ligger alle filene for å sette opp nettsiden.
+Her ligger alle filene som utgjør nettsiden.
