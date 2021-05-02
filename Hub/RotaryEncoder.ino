@@ -11,7 +11,8 @@ void stopTimeForBothTeams() {
 }
 
 
-//Debounced the butten presses on the encoder
+//When testing the button functionality on the encoder we discovered a lot of bouncing. This function will prevent the from happening.
+//We check that there has gone a longer time than debouncing_time since last button press before encoderState() is being called.
 void encoderDebounce() {
   if ((long)(micros() - last_micros) >= debouncing_time * 1000) { 
     encoderState(); //runs encoderState if it has been a longer time than debouncing_time since last button press
